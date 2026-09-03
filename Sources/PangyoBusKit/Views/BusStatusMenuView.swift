@@ -13,9 +13,9 @@ public struct BusStatusMenuView: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("SK플래닛·판교디지털센터")
+                    Text(viewModel.currentStopName)
                         .font(.headline)
-                    Text("판교역 · 서울역 방면")
+                    Text(viewModel.currentDirectionHint)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

@@ -19,6 +19,33 @@ public enum TargetBus: String, CaseIterable, Identifiable, Codable, Sendable {
         rawValue
     }
 
+    public var stopId: String {
+        switch self {
+        case .bus9007:
+            return "BS73663" // SK플래닛·판교디지털센터
+        case .bus602_1A, .bus602_1B:
+            return "BS73662" // 이노밸리·포스코DX
+        }
+    }
+
+    public var stopName: String {
+        switch self {
+        case .bus9007:
+            return "SK플래닛·판교디지털센터"
+        case .bus602_1A, .bus602_1B:
+            return "이노밸리·포스코DX"
+        }
+    }
+
+    public var directionHint: String {
+        switch self {
+        case .bus9007:
+            return "서울역/고속터미널 방면"
+        case .bus602_1A, .bus602_1B:
+            return "판교역 방면"
+        }
+    }
+
     public func matches(lineName: String) -> Bool {
         let trimmed = lineName.trimmingCharacters(in: .whitespaces)
         switch self {

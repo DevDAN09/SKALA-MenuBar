@@ -3,7 +3,7 @@ import Foundation
 public protocol BusAPIServiceProtocol: Sendable {
     func fetchStop(stopId: String) async throws -> BusStopResponse
     func fetch9007Arrival(stopId: String) async throws -> BusArrivalDetails?
-    func fetchTargetBusesArrival(stopId: String) async throws -> [TargetBus: BusArrivalDetails]
+    func fetchTargetBusesArrival() async throws -> [TargetBus: BusArrivalDetails]
 }
 
 public final class BusAPIService: BusAPIServiceProtocol, @unchecked Sendable {
@@ -41,12 +41,28 @@ public final class BusAPIService: BusAPIServiceProtocol, @unchecked Sendable {
         return line9007.arrival
     }
 
-    public func fetchTargetBusesArrival(stopId: String = "BS73663") async throws -> [TargetBus: BusArrivalDetails] {
-        let stopInfo = try await fetchStop(stopId: stopId)
-        var results: [TargetBus: BusArrivalDetails] = [:]
+    public func fetchTargetBusesArrival() async throws -> [TargetBus: BusArrivalDetails] {
+        // Collect unique stop IDs needed by TargetBus (e.g. BS73663 for 9007, BS73662 for 602-1A/B)
+        let uniqueStopIds = Array(Set(TargetBus.allCases.map(\.stopId)))
 
+        // Fetch all stops concurrently
+        var stopResponses: [String: BusStopResponse] = [:]
+        try await withThrowingTaskGroup(of: (String, BusStopResponse).self) { group in
+            for stopId in uniqueStopIds {
+                group.addTask {
+                    let response = try await self.fetchStop(stopId: stopId)
+                    return (stopId, response)
+                }
+            }
+            for try await (stopId, response) in group {
+                stopResponses[stopId] = response
+            }
+        }
+
+        var results: [TargetBus: BusArrivalDetails] = [:]
         for target in TargetBus.allCases {
-            if let line = stopInfo.lines.first(where: { target.matches(lineName: $0.name) }),
+            if let stop = stopResponses[target.stopId],
+               let line = stop.lines.first(where: { target.matches(lineName: $0.name) }),
                let arrival = line.arrival {
                 results[target] = arrival
             }

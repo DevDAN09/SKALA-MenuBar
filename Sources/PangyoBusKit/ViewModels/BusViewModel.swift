@@ -58,7 +58,7 @@ public final class BusViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            let arrivals = try await apiService.fetchTargetBusesArrival(stopId: "BS73663")
+            let arrivals = try await apiService.fetchTargetBusesArrival()
             self.allArrivals = arrivals
             self.lastUpdated = Date()
             self.menuTitle = formatMenuTitle(arrivals[selectedBus])
@@ -111,6 +111,14 @@ public final class BusViewModel: ObservableObject {
 
     public var currentSecondBusText: String {
         secondBusText(for: selectedBus)
+    }
+
+    public var currentStopName: String {
+        selectedBus.stopName
+    }
+
+    public var currentDirectionHint: String {
+        selectedBus.directionHint
     }
 
     public var lastUpdatedString: String {
