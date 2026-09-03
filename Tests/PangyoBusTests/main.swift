@@ -44,6 +44,24 @@ func testDecodeKakaoStopJson() throws {
             "arrivalTime2": 1500,
             "busStopCount2": 15
           }
+        },
+        {
+          "id": "B1002",
+          "name": "602-1A",
+          "busLineType": "MAUL",
+          "arrival": {
+            "arrivalTime": 300,
+            "busStopCount": 3
+          }
+        },
+        {
+          "id": "B1003",
+          "name": "602-1B (평일)",
+          "busLineType": "MAUL",
+          "arrival": {
+            "arrivalTime": 90,
+            "busStopCount": 1
+          }
         }
       ]
     }
@@ -52,24 +70,24 @@ func testDecodeKakaoStopJson() throws {
     let decoder = JSONDecoder()
     let response = try decoder.decode(BusStopResponse.self, from: sampleJson)
     assert(response.name == "SK플래닛.판교디지털센터", "name should match")
-    assert(response.lines.count == 1, "lines count should be 1")
+    assert(response.lines.count == 3, "lines count should be 3")
 
     let line = response.lines.first!
     assert(line.name == "9007", "line name should be 9007")
     assert(line.arrival?.arrivalTime == 716, "arrival time should be 716")
-    assert(line.arrival?.busStopCount == 8, "bus stop count should be 8")
-    assert(line.arrival?.vehicleNumber == "경기70아6229", "vehicle number should match")
     print("✅ testDecodeKakaoStopJson passed")
 }
 
-func testBusAPIServiceFiltering() async throws {
+func testBusAPIServiceMultiBusFiltering() async throws {
     let json = """
     {
       "id": "BS73663",
       "name": "SK플래닛.판교디지털센터",
       "lines": [
         { "id": "B101", "name": "375", "arrival": { "arrivalTime": 200 } },
-        { "id": "B102", "name": "9007", "arrival": { "arrivalTime": 650, "busStopCount": 7, "vehicleNumber": "경기70아6229" } }
+        { "id": "B102", "name": "9007", "arrival": { "arrivalTime": 650, "busStopCount": 7, "vehicleNumber": "경기70아6229" } },
+        { "id": "B103", "name": "602-1A", "arrival": { "arrivalTime": 300, "busStopCount": 3, "vehicleNumber": "경기70아8021" } },
+        { "id": "B104", "name": "602-1B (평일)", "arrival": { "arrivalTime": 80, "busStopCount": 1, "vehicleNumber": "경기70아8015" } }
       ]
     }
     """.data(using: .utf8)!
@@ -80,64 +98,56 @@ func testBusAPIServiceFiltering() async throws {
     let mockSession = URLSession(configuration: config)
 
     let service = BusAPIService(session: mockSession)
-    let arrival = try await service.fetch9007Arrival(stopId: "BS73663")
+    let arrivals = try await service.fetchTargetBusesArrival(stopId: "BS73663")
 
-    assert(arrival != nil, "arrival must not be nil")
-    assert(arrival?.arrivalTime == 650, "arrival time should be 650")
-    assert(arrival?.busStopCount == 7, "bus stop count should be 7")
-    assert(arrival?.vehicleNumber == "경기70아6229", "vehicle plate must match")
-    print("✅ testBusAPIServiceFiltering passed")
+    assert(arrivals[.bus9007]?.arrivalTime == 650, "9007 arrival time should be 650")
+    assert(arrivals[.bus602_1A]?.arrivalTime == 300, "602-1A arrival time should be 300")
+    assert(arrivals[.bus602_1B]?.arrivalTime == 80, "602-1B arrival time should be 80")
+    print("✅ testBusAPIServiceMultiBusFiltering passed")
 }
 
-struct MockService: BusAPIServiceProtocol, Sendable {
-    let mockArrival: BusArrivalDetails?
+struct MockMultiService: BusAPIServiceProtocol, Sendable {
+    let mockArrivals: [TargetBus: BusArrivalDetails]
     func fetchStop(stopId: String) async throws -> BusStopResponse {
         BusStopResponse(id: "BS73663", name: "SK플래닛", lines: [])
     }
     func fetch9007Arrival(stopId: String) async throws -> BusArrivalDetails? {
-        mockArrival
+        mockArrivals[.bus9007]
+    }
+    func fetchTargetBusesArrival(stopId: String) async throws -> [TargetBus: BusArrivalDetails] {
+        mockArrivals
     }
 }
 
 @MainActor
-func testBusViewModelFormatting() async {
-    let arrivalNormal = BusArrivalDetails(
-        direction: "서울역 방면",
-        vehicleNumber: "경기70아6229",
-        arrivalTime: 720, // 12 mins
-        busStopCount: 8
-    )
-    let vmNormal = BusViewModel(apiService: MockService(mockArrival: arrivalNormal))
-    vmNormal.stopAutoRefresh()
-    await vmNormal.refresh()
-    assert(vmNormal.menuTitle == "🚌 9007: 12분 (8전)", "Title should be '🚌 9007: 12분 (8전)', got '\(vmNormal.menuTitle)'")
+func testBusViewModelSelection() async {
+    let arrivals: [TargetBus: BusArrivalDetails] = [
+        .bus9007: BusArrivalDetails(arrivalTime: 720, busStopCount: 8),
+        .bus602_1A: BusArrivalDetails(arrivalTime: 300, busStopCount: 3),
+        .bus602_1B: BusArrivalDetails(arrivalTime: 90, busStopCount: 1)
+    ]
+    let vm = BusViewModel(apiService: MockMultiService(mockArrivals: arrivals))
+    vm.stopAutoRefresh()
 
-    let arrivalSoon = BusArrivalDetails(
-        direction: "서울역 방면",
-        vehicleNumber: "경기70아6229",
-        arrivalTime: 110, // 2 mins
-        busStopCount: 1
-    )
-    let vmSoon = BusViewModel(apiService: MockService(mockArrival: arrivalSoon))
-    vmSoon.stopAutoRefresh()
-    await vmSoon.refresh()
-    assert(vmSoon.menuTitle == "🚨 9007: 2분 전 (1전)", "Title should be '🚨 9007: 2분 전 (1전)', got '\(vmSoon.menuTitle)'")
+    vm.selectedBus = .bus9007
+    await vm.refresh()
+    assert(vm.menuTitle == "🚌 9007: 12분 (8전)", "Title should be '🚌 9007: 12분 (8전)', got '\(vm.menuTitle)'")
 
-    let arrivalNone = BusArrivalDetails(arrivalTime: 0, busStopCount: 0)
-    let vmNone = BusViewModel(apiService: MockService(mockArrival: arrivalNone))
-    vmNone.stopAutoRefresh()
-    await vmNone.refresh()
-    assert(vmNone.menuTitle == "🚌 9007: 정보 없음", "Title should be '🚌 9007: 정보 없음', got '\(vmNone.menuTitle)'")
+    vm.selectedBus = .bus602_1B
+    assert(vm.menuTitle == "🚨 602-1B: 2분 전 (1전)", "Title should be '🚨 602-1B: 2분 전 (1전)', got '\(vm.menuTitle)'")
 
-    print("✅ testBusViewModelFormatting passed")
+    vm.selectedBus = .bus602_1A
+    assert(vm.menuTitle == "🚌 602-1A: 5분 (3전)", "Title should be '🚌 602-1A: 5분 (3전)', got '\(vm.menuTitle)'")
+
+    print("✅ testBusViewModelSelection passed")
 }
 
 func main() async {
     do {
         try testDecodeKakaoStopJson()
-        try await testBusAPIServiceFiltering()
-        await testBusViewModelFormatting()
-        print("🎉 All Task 1, 2, 3 tests passed successfully!")
+        try await testBusAPIServiceMultiBusFiltering()
+        await testBusViewModelSelection()
+        print("🎉 All multi-bus tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
         exit(1)

@@ -15,7 +15,7 @@ public struct BusStatusMenuView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text("SK플래닛·판교디지털센터")
                         .font(.headline)
-                    Text("서울역/고속터미널 방면 · 9007번")
+                    Text("판교역 · 서울역 방면")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -26,14 +26,60 @@ public struct BusStatusMenuView: View {
                 }
             }
 
+            // Bus Selector Buttons
+            HStack(spacing: 6) {
+                ForEach(TargetBus.allCases) { bus in
+                    let isSelected = viewModel.selectedBus == bus
+                    Button {
+                        viewModel.selectedBus = bus
+                    } label: {
+                        VStack(spacing: 2) {
+                            Text(bus.shortName)
+                                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                            if let arrival = viewModel.allArrivals[bus], let seconds = arrival.arrivalTime, seconds > 0 {
+                                let mins = max(1, Int(ceil(Double(seconds) / 60.0)))
+                                Text("\(mins)분")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(mins <= 3 ? .red : (isSelected ? .white : .primary))
+                            } else {
+                                Text("정보없음")
+                                    .font(.system(size: 9))
+                                    .foregroundColor(isSelected ? .white.opacity(0.8) : .secondary)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 6)
+                        .background(isSelected ? Color.accentColor : Color.secondary.opacity(0.12))
+                        .foregroundColor(isSelected ? .white : .primary)
+                        .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+
             Divider()
+
+            // Selected Bus Heading
+            HStack {
+                Text(viewModel.selectedBus.displayName)
+                    .font(.subheadline)
+                    .bold()
+                Spacer()
+                Text("메뉴바 표시 중")
+                    .font(.caption2)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.accentColor.opacity(0.15))
+                    .foregroundColor(.accentColor)
+                    .cornerRadius(4)
+            }
 
             // 1st Bus Card
             VStack(alignment: .leading, spacing: 4) {
                 Label("첫 번째 버스", systemImage: "bus.fill")
                     .font(.subheadline)
                     .foregroundColor(.accentColor)
-                Text(viewModel.firstBusText)
+                Text(viewModel.currentFirstBusText)
                     .font(.system(.body, design: .rounded))
                     .bold()
             }
@@ -47,7 +93,7 @@ public struct BusStatusMenuView: View {
                 Label("두 번째 버스", systemImage: "bus")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                Text(viewModel.secondBusText)
+                Text(viewModel.currentSecondBusText)
                     .font(.system(.body, design: .rounded))
             }
             .padding(8)

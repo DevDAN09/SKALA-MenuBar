@@ -1,5 +1,37 @@
 import Foundation
 
+public enum TargetBus: String, CaseIterable, Identifiable, Codable, Sendable {
+    case bus9007 = "9007"
+    case bus602_1A = "602-1A"
+    case bus602_1B = "602-1B"
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .bus9007: return "9007 (직행)"
+        case .bus602_1A: return "602-1A (마을)"
+        case .bus602_1B: return "602-1B (마을)"
+        }
+    }
+
+    public var shortName: String {
+        rawValue
+    }
+
+    public func matches(lineName: String) -> Bool {
+        let trimmed = lineName.trimmingCharacters(in: .whitespaces)
+        switch self {
+        case .bus9007:
+            return trimmed == "9007"
+        case .bus602_1A:
+            return trimmed.contains("602-1A")
+        case .bus602_1B:
+            return trimmed.contains("602-1B")
+        }
+    }
+}
+
 public struct BusStopResponse: Codable, Sendable {
     public let id: String
     public let name: String

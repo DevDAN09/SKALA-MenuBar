@@ -3,6 +3,7 @@ import Foundation
 public protocol BusAPIServiceProtocol: Sendable {
     func fetchStop(stopId: String) async throws -> BusStopResponse
     func fetch9007Arrival(stopId: String) async throws -> BusArrivalDetails?
+    func fetchTargetBusesArrival(stopId: String) async throws -> [TargetBus: BusArrivalDetails]
 }
 
 public final class BusAPIService: BusAPIServiceProtocol, @unchecked Sendable {
@@ -34,9 +35,23 @@ public final class BusAPIService: BusAPIServiceProtocol, @unchecked Sendable {
 
     public func fetch9007Arrival(stopId: String = "BS73663") async throws -> BusArrivalDetails? {
         let stopInfo = try await fetchStop(stopId: stopId)
-        guard let line9007 = stopInfo.lines.first(where: { $0.name.trimmingCharacters(in: .whitespaces) == "9007" }) else {
+        guard let line9007 = stopInfo.lines.first(where: { TargetBus.bus9007.matches(lineName: $0.name) }) else {
             return nil
         }
         return line9007.arrival
+    }
+
+    public func fetchTargetBusesArrival(stopId: String = "BS73663") async throws -> [TargetBus: BusArrivalDetails] {
+        let stopInfo = try await fetchStop(stopId: stopId)
+        var results: [TargetBus: BusArrivalDetails] = [:]
+
+        for target in TargetBus.allCases {
+            if let line = stopInfo.lines.first(where: { target.matches(lineName: $0.name) }),
+               let arrival = line.arrival {
+                results[target] = arrival
+            }
+        }
+
+        return results
     }
 }

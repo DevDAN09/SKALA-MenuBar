@@ -3,8 +3,17 @@ import Combine
 
 @MainActor
 public final class BusViewModel: ObservableObject {
-    @Published public private(set) var menuTitle: String = "🚌 9007: 로딩 중…"
-    @Published public private(set) var arrival: BusArrivalDetails?
+    private static let selectedBusKey = "PangyoBus_SelectedBus"
+
+    @Published public var selectedBus: TargetBus {
+        didSet {
+            UserDefaults.standard.set(selectedBus.rawValue, forKey: Self.selectedBusKey)
+            self.menuTitle = formatMenuTitle(allArrivals[selectedBus])
+        }
+    }
+
+    @Published public private(set) var menuTitle: String = "🚌 버스: 로딩 중…"
+    @Published public private(set) var allArrivals: [TargetBus: BusArrivalDetails] = [:]
     @Published public private(set) var lastUpdated: Date?
     @Published public private(set) var isLoading: Bool = false
     @Published public private(set) var errorMessage: String?
@@ -20,6 +29,14 @@ public final class BusViewModel: ObservableObject {
     public init(apiService: BusAPIServiceProtocol = BusAPIService.shared, refreshInterval: Int = 30) {
         self.apiService = apiService
         self.refreshIntervalSeconds = refreshInterval
+
+        if let savedRaw = UserDefaults.standard.string(forKey: Self.selectedBusKey),
+           let savedBus = TargetBus(rawValue: savedRaw) {
+            self.selectedBus = savedBus
+        } else {
+            self.selectedBus = .bus9007
+        }
+
         setupTimer()
     }
 
@@ -41,34 +58,35 @@ public final class BusViewModel: ObservableObject {
         isLoading = true
         errorMessage = nil
         do {
-            let details = try await apiService.fetch9007Arrival(stopId: "BS73663")
-            self.arrival = details
+            let arrivals = try await apiService.fetchTargetBusesArrival(stopId: "BS73663")
+            self.allArrivals = arrivals
             self.lastUpdated = Date()
-            self.menuTitle = formatMenuTitle(details)
+            self.menuTitle = formatMenuTitle(arrivals[selectedBus])
         } catch {
             self.errorMessage = error.localizedDescription
-            self.menuTitle = "⚠️ 9007: 확인 실패"
+            self.menuTitle = "⚠️ \(selectedBus.shortName): 확인 실패"
         }
         isLoading = false
     }
 
     public func formatMenuTitle(_ details: BusArrivalDetails?) -> String {
+        let busName = selectedBus.shortName
         guard let details = details, let seconds = details.arrivalTime, seconds > 0 else {
-            return "🚌 9007: 정보 없음"
+            return "🚌 \(busName): 정보 없음"
         }
 
         let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
         let stops = details.busStopCount ?? 0
 
         if minutes <= 3 {
-            return "🚨 9007: \(minutes)분 전 (\(stops)전)"
+            return "🚨 \(busName): \(minutes)분 전 (\(stops)전)"
         } else {
-            return "🚌 9007: \(minutes)분 (\(stops)전)"
+            return "🚌 \(busName): \(minutes)분 (\(stops)전)"
         }
     }
 
-    public var firstBusText: String {
-        guard let arrival = arrival, let seconds = arrival.arrivalTime, seconds > 0 else {
+    public func firstBusText(for bus: TargetBus) -> String {
+        guard let arrival = allArrivals[bus], let seconds = arrival.arrivalTime, seconds > 0 else {
             return "도착 정보 없음 (차고지 대기 또는 운행 종료)"
         }
         let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
@@ -77,14 +95,22 @@ public final class BusViewModel: ObservableObject {
         return "약 \(minutes)분 뒤 도착 (\(stops))\(plate)"
     }
 
-    public var secondBusText: String {
-        guard let arrival = arrival, let seconds = arrival.arrivalTime2, seconds > 0 else {
+    public func secondBusText(for bus: TargetBus) -> String {
+        guard let arrival = allArrivals[bus], let seconds = arrival.arrivalTime2, seconds > 0 else {
             return "다음 버스 도착 정보 없음"
         }
         let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
         let stops = arrival.busStopCount2.map { "\($0)정류장 전" } ?? ""
         let plate = arrival.vehicleNumber2.map { " [\($0)]" } ?? ""
         return "약 \(minutes)분 뒤 도착 (\(stops))\(plate)"
+    }
+
+    public var currentFirstBusText: String {
+        firstBusText(for: selectedBus)
+    }
+
+    public var currentSecondBusText: String {
+        secondBusText(for: selectedBus)
     }
 
     public var lastUpdatedString: String {
