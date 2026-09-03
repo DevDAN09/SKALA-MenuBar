@@ -89,11 +89,55 @@ func testBusAPIServiceFiltering() async throws {
     print("✅ testBusAPIServiceFiltering passed")
 }
 
+struct MockService: BusAPIServiceProtocol, Sendable {
+    let mockArrival: BusArrivalDetails?
+    func fetchStop(stopId: String) async throws -> BusStopResponse {
+        BusStopResponse(id: "BS73663", name: "SK플래닛", lines: [])
+    }
+    func fetch9007Arrival(stopId: String) async throws -> BusArrivalDetails? {
+        mockArrival
+    }
+}
+
+@MainActor
+func testBusViewModelFormatting() async {
+    let arrivalNormal = BusArrivalDetails(
+        direction: "서울역 방면",
+        vehicleNumber: "경기70아6229",
+        arrivalTime: 720, // 12 mins
+        busStopCount: 8
+    )
+    let vmNormal = BusViewModel(apiService: MockService(mockArrival: arrivalNormal))
+    vmNormal.stopAutoRefresh()
+    await vmNormal.refresh()
+    assert(vmNormal.menuTitle == "🚌 9007: 12분 (8전)", "Title should be '🚌 9007: 12분 (8전)', got '\(vmNormal.menuTitle)'")
+
+    let arrivalSoon = BusArrivalDetails(
+        direction: "서울역 방면",
+        vehicleNumber: "경기70아6229",
+        arrivalTime: 110, // 2 mins
+        busStopCount: 1
+    )
+    let vmSoon = BusViewModel(apiService: MockService(mockArrival: arrivalSoon))
+    vmSoon.stopAutoRefresh()
+    await vmSoon.refresh()
+    assert(vmSoon.menuTitle == "🚨 9007: 2분 전 (1전)", "Title should be '🚨 9007: 2분 전 (1전)', got '\(vmSoon.menuTitle)'")
+
+    let arrivalNone = BusArrivalDetails(arrivalTime: 0, busStopCount: 0)
+    let vmNone = BusViewModel(apiService: MockService(mockArrival: arrivalNone))
+    vmNone.stopAutoRefresh()
+    await vmNone.refresh()
+    assert(vmNone.menuTitle == "🚌 9007: 정보 없음", "Title should be '🚌 9007: 정보 없음', got '\(vmNone.menuTitle)'")
+
+    print("✅ testBusViewModelFormatting passed")
+}
+
 func main() async {
     do {
         try testDecodeKakaoStopJson()
         try await testBusAPIServiceFiltering()
-        print("🎉 All Task 1 & 2 tests passed successfully!")
+        await testBusViewModelFormatting()
+        print("🎉 All Task 1, 2, 3 tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
         exit(1)
