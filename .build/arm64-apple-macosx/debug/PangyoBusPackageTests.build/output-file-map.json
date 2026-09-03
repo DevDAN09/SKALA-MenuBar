@@ -1,0 +1,12 @@
+{
+  "": {
+    "swift-dependencies": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/primary.swiftdeps"
+  },
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/runner.d",
+    "object": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusPackageTests.build/runner.dia"
+  }
+}

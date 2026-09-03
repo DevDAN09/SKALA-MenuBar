@@ -1,0 +1,159 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "PackageStructure": ["<PackageStructure>"]
+  "PangyoBus-arm64-apple-macosx-debug.exe": ["<PangyoBus-arm64-apple-macosx-debug.exe>"]
+  "PangyoBus-arm64-apple-macosx-debug.module": ["<PangyoBus-arm64-apple-macosx-debug.module>"]
+  "PangyoBusKit-arm64-apple-macosx-debug.module": ["<PangyoBusKit-arm64-apple-macosx-debug.module>"]
+  "PangyoBusTests-arm64-apple-macosx-debug.exe": ["<PangyoBusTests-arm64-apple-macosx-debug.exe>"]
+  "PangyoBusTests-arm64-apple-macosx-debug.module": ["<PangyoBusTests-arm64-apple-macosx-debug.module>"]
+  "main": ["<PangyoBus-arm64-apple-macosx-debug.exe>","<PangyoBus-arm64-apple-macosx-debug.module>","<PangyoBusKit-arm64-apple-macosx-debug.module>","<PangyoBusTests-arm64-apple-macosx-debug.exe>","<PangyoBusTests-arm64-apple-macosx-debug.module>"]
+  "test": ["<PangyoBus-arm64-apple-macosx-debug.exe>","<PangyoBus-arm64-apple-macosx-debug.module>","<PangyoBusKit-arm64-apple-macosx-debug.module>","<PangyoBusTests-arm64-apple-macosx-debug.exe>","<PangyoBusTests-arm64-apple-macosx-debug.module>"]
+default: "main"
+nodes:
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBus/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBusKit/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/Tests/PangyoBusTests/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus":
+    is-mutated: true
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests":
+    is-mutated: true
+commands:
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus-entitlement.plist"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus-entitlement.plist"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBus/main.swift"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/sources"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/sources"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.product/Objects.LinkFileList"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBusKit/Models/BusArrival.swift"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/sources"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/sources"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests-entitlement.plist":
+    tool: write-auxiliary-file
+    inputs: ["<entitlement-plist>","<com.apple.security.get-task-allow>"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests-entitlement.plist"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests-entitlement.plist"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Tests/PangyoBusTests/main.swift"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/sources"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/sources"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/main.swift.o"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.product/Objects.LinkFileList"
+
+  "/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/Library/Developer/CommandLineTools/usr/bin/swiftc"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt"
+
+  "<PangyoBus-arm64-apple-macosx-debug.exe>":
+    tool: phony
+    inputs: ["<PangyoBus-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    outputs: ["<PangyoBus-arm64-apple-macosx-debug.exe>"]
+
+  "<PangyoBus-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBus.swiftmodule"]
+    outputs: ["<PangyoBus-arm64-apple-macosx-debug.module>"]
+
+  "<PangyoBusKit-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule"]
+    outputs: ["<PangyoBusKit-arm64-apple-macosx-debug.module>"]
+
+  "<PangyoBusTests-arm64-apple-macosx-debug.exe>":
+    tool: phony
+    inputs: ["<PangyoBusTests-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    outputs: ["<PangyoBusTests-arm64-apple-macosx-debug.exe>"]
+
+  "<PangyoBusTests-arm64-apple-macosx-debug.module>":
+    tool: phony
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusTests.swiftmodule"]
+    outputs: ["<PangyoBusTests-arm64-apple-macosx-debug.module>"]
+
+  "C.PangyoBus-arm64-apple-macosx-debug.exe":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.product/Objects.LinkFileList"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/PangyoBus"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug","-o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus","-module-name","PangyoBus","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_PangyoBus_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Library/Developer/CommandLineTools/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx13.0","-Xlinker","-add_ast_path","-Xlinker","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBus.swiftmodule","-Xlinker","-add_ast_path","-Xlinker","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.PangyoBus-arm64-apple-macosx-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus-entitlement.plist"]
+    outputs: ["<PangyoBus-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/PangyoBus"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus-entitlement.plist","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus"]
+
+  "C.PangyoBus-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBus/main.swift","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/sources"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBus.swiftmodule"]
+    description: "Compiling Swift Module 'PangyoBus' (1 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","PangyoBus","-emit-dependencies","-emit-module","-emit-module-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBus.swiftmodule","-output-file-map","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/output-file-map.json","-incremental","-c","@/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBus.build/sources","-I","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx13.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","PangyoBus_main","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","pangyo_bus_menubar"]
+
+  "C.PangyoBusKit-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBusKit/Models/BusArrival.swift","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/sources"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule"]
+    description: "Compiling Swift Module 'PangyoBusKit' (1 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","PangyoBusKit","-emit-dependencies","-emit-module","-emit-module-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule","-output-file-map","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/output-file-map.json","-parse-as-library","-incremental","-c","@/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/sources","-I","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx13.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-parse-as-library","-emit-objc-header","-emit-objc-header-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/include/PangyoBusKit-Swift.h","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","pangyo_bus_menubar"]
+
+  "C.PangyoBusTests-arm64-apple-macosx-debug.exe":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusKit.build/BusArrival.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.product/Objects.LinkFileList"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests"]
+    description: "Linking ./.build/arm64-apple-macosx/debug/PangyoBusTests"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-L","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug","-o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests","-module-name","PangyoBusTests","-Xlinker","-no_warn_duplicate_libraries","-emit-executable","-Xlinker","-alias","-Xlinker","_PangyoBusTests_main","-Xlinker","_main","-Xlinker","-rpath","-Xlinker","@loader_path","@/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.product/Objects.LinkFileList","-Xlinker","-rpath","-Xlinker","/Library/Developer/CommandLineTools/usr/lib/swift-6.2/macosx","-target","arm64-apple-macosx13.0","-Xlinker","-add_ast_path","-Xlinker","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule","-Xlinker","-add_ast_path","-Xlinker","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusTests.swiftmodule","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g"]
+
+  "C.PangyoBusTests-arm64-apple-macosx-debug.exe-entitlements":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests-entitlement.plist"]
+    outputs: ["<PangyoBusTests-arm64-apple-macosx-debug.exe-CodeSigning>"]
+    description: "Applying debug entitlements to ./.build/arm64-apple-macosx/debug/PangyoBusTests"
+    args: ["codesign","--force","--sign","-","--entitlements","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests-entitlement.plist","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests"]
+
+  "C.PangyoBusTests-arm64-apple-macosx-debug.module":
+    tool: shell
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/Tests/PangyoBusTests/main.swift","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/swift-version--1AB21518FC5DEDBE.txt","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusKit.swiftmodule","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/sources"]
+    outputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/main.swift.o","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusTests.swiftmodule"]
+    description: "Compiling Swift Module 'PangyoBusTests' (1 sources)"
+    args: ["/Library/Developer/CommandLineTools/usr/bin/swiftc","-module-name","PangyoBusTests","-emit-dependencies","-emit-module","-emit-module-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules/PangyoBusTests.swiftmodule","-output-file-map","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/output-file-map.json","-incremental","-c","@/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/PangyoBusTests.build/sources","-I","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/Modules","-target","arm64-apple-macosx13.0","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/index/store","-Onone","-enable-testing","-j10","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/Users/yeongmin-yun/2026/pangyo-bus-menubar/.build/arm64-apple-macosx/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","PangyoBusTests_main","-swift-version","5","-I","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-L","/Library/Developer/CommandLineTools/Library/Developer/Frameworks","-plugin-path","/Library/Developer/CommandLineTools/usr/lib/swift/host/plugins/testing","-sdk","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-g","-Xcc","-isysroot","-Xcc","/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk","-Xcc","-fPIC","-Xcc","-g","-package-name","pangyo_bus_menubar"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBus/","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Sources/PangyoBusKit/","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Tests/PangyoBusTests/","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Package.swift","/Users/yeongmin-yun/2026/pangyo-bus-menubar/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
