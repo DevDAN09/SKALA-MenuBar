@@ -1,5 +1,5 @@
 import Foundation
-import PangyoBusKit
+import SKALAMenuBarKit
 
 final class MockURLProtocol: URLProtocol {
     static var stopDataMap: [String: Data] = [:]
@@ -125,12 +125,66 @@ func testBusViewModelDynamicStopName() async {
     print("✅ testBusViewModelDynamicStopName passed")
 }
 
+func testCafeteriaMenuModels() {
+    let dummyDay = DailyMenu(
+        weekday: "화",
+        dateString: "2026-09-08",
+        breakfast: [MealCategoryItem(cornerName: "한식", items: ["쌀밥", "된장국"])],
+        lunch: [
+            MealCategoryItem(cornerName: "한식", items: ["흑미밥", "제육볶음"]),
+            MealCategoryItem(cornerName: "양식", items: ["돈까스"])
+        ],
+        dinner: [MealCategoryItem(cornerName: "한식", items: ["볶음밥"])]
+    )
+
+    let dummyWeekly = WeeklyMenu(
+        title: "이노밸리 식단표",
+        imageUrl: "https://example.com/img.jpg",
+        postUrl: "https://pf.kakao.com/_LCxlxlxb",
+        days: [dummyDay]
+    )
+
+    assert(dummyWeekly.menu(for: "화")?.lunch.count == 2, "Lunch should have 2 categories")
+    assert(dummyDay.meals(for: .lunch).first?.items.contains("제육볶음") == true, "Lunch items mismatch")
+    print("✅ testCafeteriaMenuModels passed")
+}
+
+@MainActor
+func testCafeteriaViewModelDefaults() {
+    let vm = CafeteriaViewModel()
+    assert(["월", "화", "수", "목", "금"].contains(vm.selectedWeekday), "Default weekday should be valid")
+    assert(MealType.allCases.contains(vm.selectedMealType), "Default meal type should be valid")
+    print("✅ testCafeteriaViewModelDefaults passed")
+}
+
+func testCafeteriaLiveFetchAndParse() async throws {
+    let service = CafeteriaAPIService()
+    let menu = try await service.fetchWeeklyMenu(forceRefresh: true)
+    assert(!menu.days.isEmpty, "Days should not be empty")
+    assert(menu.days.count == 5, "Should parse 5 weekdays (월~금)")
+
+    for day in ["월", "화", "수", "목", "금"] {
+        if let d = menu.menu(for: day) {
+            print("🍱 [\(day)요일] 점심 코너 수: \(d.lunch.count)")
+            for cat in d.lunch {
+                print("   [\(cat.cornerName)] \(cat.items.joined(separator: ", "))")
+            }
+            assert(!d.lunch.isEmpty, "\(day) lunch should have items")
+        }
+    }
+
+    print("✅ testCafeteriaLiveFetchAndParse passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
-        print("🎉 All 이노밸리 & SK플래닛 multi-stop tests passed successfully!")
+        testCafeteriaMenuModels()
+        await testCafeteriaViewModelDefaults()
+        try await testCafeteriaLiveFetchAndParse()
+        print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
         exit(1)
@@ -138,3 +192,4 @@ func main() async {
 }
 
 await main()
+

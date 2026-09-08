@@ -2,29 +2,29 @@
 import PackageDescription
 
 let package = Package(
-    name: "PangyoBus",
+    name: "SKALAMenuBar",
     platforms: [.macOS(.v13)],
     products: [
-        .library(name: "PangyoBusKit", targets: ["PangyoBusKit"]),
-        .executable(name: "PangyoBus", targets: ["PangyoBus"]),
-        .executable(name: "PangyoBusTests", targets: ["PangyoBusTests"])
+        .library(name: "SKALAMenuBarKit", targets: ["SKALAMenuBarKit"]),
+        .executable(name: "SKALA-MenuBar", targets: ["SKALAMenuBar"]),
+        .executable(name: "SKALAMenuBarTests", targets: ["SKALAMenuBarTests"])
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "PangyoBusKit",
+            name: "SKALAMenuBarKit",
             dependencies: [],
-            path: "Sources/PangyoBusKit"
+            path: "Sources/SKALAMenuBarKit"
         ),
         .executableTarget(
-            name: "PangyoBus",
-            dependencies: ["PangyoBusKit"],
-            path: "Sources/PangyoBus"
+            name: "SKALAMenuBar",
+            dependencies: ["SKALAMenuBarKit"],
+            path: "Sources/SKALAMenuBar"
         ),
         .executableTarget(
-            name: "PangyoBusTests",
-            dependencies: ["PangyoBusKit"],
-            path: "Tests/PangyoBusTests"
+            name: "SKALAMenuBarTests",
+            dependencies: ["SKALAMenuBarKit"],
+            path: "Tests/SKALAMenuBarTests"
         )
     ]
 )

@@ -4,14 +4,14 @@ set -e
 DIR="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$DIR"
 
-echo "🚌 Building PangyoBus in release mode..."
+echo "⚡ Building SKALA-MenuBar in release mode..."
 swift build -c release
 
 # Kill any existing instance if running
-pkill -f "\.build/release/PangyoBus" || true
-pkill -f "\.build/debug/PangyoBus" || true
+pkill -f "SKALA-MenuBar" || true
+pkill -f "PangyoBus" || true
 
-echo "🚀 Starting PangyoBus in background..."
-"$DIR/.build/release/PangyoBus" > /dev/null 2>&1 &
+echo "🚀 Starting SKALA-MenuBar in background..."
+"$DIR/.build/release/SKALA-MenuBar" > /dev/null 2>&1 &
 
-echo "✨ PangyoBus is now running in your macOS menu bar!"
+echo "✨ SKALA-MenuBar is now running in your macOS menu bar!"
