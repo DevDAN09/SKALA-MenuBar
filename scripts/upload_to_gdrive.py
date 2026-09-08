@@ -41,9 +41,39 @@ def upload():
         creds_dict = json.loads(creds_json)
         credentials = service_account.Credentials.from_service_account_info(
             creds_dict,
-            scopes=["https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/drive"]
+            scopes=["https://www.googleapis.com/auth/drive"]
         )
         service = build("drive", "v3", credentials=credentials)
+
+        # 1. Verify authentication identity
+        try:
+            about = service.about().get(fields="user").execute()
+            user_info = about.get("user", {})
+            print(f"👤 Service Account: {user_info.get('emailAddress', 'unknown')}")
+        except Exception as auth_err:
+            print(f"⚠️ Could not fetch user info: {auth_err}")
+
+        # 2. Check folder access and capabilities
+        try:
+            folder = service.files().get(
+                fileId=folder_id,
+                fields="id, name, capabilities",
+                supportsAllDrives=True
+            ).execute()
+            print(f"📁 Folder access verified: '{folder.get('name')}' (ID: {folder.get('id')})")
+            can_add = folder.get("capabilities", {}).get("canAddChildren", False)
+            print(f"🔑 Can write to folder: {can_add}")
+            if not can_add:
+                print("❌ Service account does not have 'Editor/Writer' permissions on this folder!")
+                sys.exit(1)
+        except Exception as folder_err:
+            print(f"❌ Folder access check failed: {folder_err}")
+            client_email = creds_dict.get("client_email", "unknown")
+            print(f"\n💡 [확인 사항]")
+            print(f"1. 구글 드라이브 폴더({folder_id})에 아래 이메일이 '편집자(Editor)'로 공유되어 있는지 확인:")
+            print(f"   👉 {client_email}")
+            print(f"2. 만약 회사/조직 계정(Google Workspace)인 경우, '조직 외부 사용자와 공유'가 허용되어 있는지 확인해 주세요.")
+            sys.exit(1)
 
         # Check if file with same name already exists in the folder (supports personal and shared drives)
         query = f"'{folder_id}' in parents and name = '{pkg_name}' and trashed = false"
