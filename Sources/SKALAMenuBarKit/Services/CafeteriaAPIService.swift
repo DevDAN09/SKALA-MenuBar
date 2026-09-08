@@ -2,19 +2,12 @@ import Foundation
 import Cocoa
 import Vision
 
-public protocol CafeteriaAPIServiceProtocol: Sendable {
-    func fetchWeeklyMenu(forceRefresh: Bool) async throws -> WeeklyMenu
-}
-
-public final class CafeteriaAPIService: CafeteriaAPIServiceProtocol, @unchecked Sendable {
-    private let session: URLSession
-    private let channelId: String
+public final class CafeteriaAPIService: @unchecked Sendable {
+    private let session = URLSession.shared
+    private let channelId = "_LCxlxlxb"
     private let cacheFileName = "cafeteria_weekly_menu_cache.json"
 
-    public init(session: URLSession = .shared, channelId: String = "_LCxlxlxb") {
-        self.session = session
-        self.channelId = channelId
-    }
+    public init() {}
 
     private struct PostMedia: Codable {
         let url: String?
@@ -37,8 +30,6 @@ public final class CafeteriaAPIService: CafeteriaAPIServiceProtocol, @unchecked 
     private struct OCRBox {
         let text: String
         let y: Double
-        let width: Double
-        let height: Double
     }
 
     public func fetchWeeklyMenu(forceRefresh: Bool = false) async throws -> WeeklyMenu {
@@ -233,9 +224,7 @@ public final class CafeteriaAPIService: CafeteriaAPIServiceProtocol, @unchecked 
                             let bbox = obs.boundingBox
                             results.append(OCRBox(
                                 text: text,
-                                y: Double(1.0 - (bbox.origin.y + bbox.size.height)),
-                                width: Double(bbox.size.width),
-                                height: Double(bbox.size.height)
+                                y: Double(1.0 - (bbox.origin.y + bbox.size.height))
                             ))
                         }
                     }

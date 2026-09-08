@@ -13,9 +13,9 @@ public struct BusStatusMenuView: View {
             // Header
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(viewModel.currentStopName)
+                    Text(viewModel.selectedBus.stopName)
                         .font(.headline)
-                    Text(viewModel.currentDirectionHint)
+                    Text(viewModel.selectedBus.directionHint)
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -34,7 +34,7 @@ public struct BusStatusMenuView: View {
                         viewModel.selectedBus = bus
                     } label: {
                         VStack(spacing: 2) {
-                            Text(bus.shortName)
+                            Text(bus.rawValue)
                                 .font(.system(size: 13, weight: isSelected ? .bold : .medium))
                             if let arrival = viewModel.allArrivals[bus], let seconds = arrival.arrivalTime, seconds > 0 {
                                 let mins = max(1, Int(ceil(Double(seconds) / 60.0)))
@@ -79,7 +79,7 @@ public struct BusStatusMenuView: View {
                 Label("첫 번째 버스", systemImage: "bus.fill")
                     .font(.subheadline)
                     .foregroundColor(.accentColor)
-                Text(viewModel.currentFirstBusText)
+                Text(viewModel.firstBusText(for: viewModel.selectedBus))
                     .font(.system(.body, design: .rounded))
                     .bold()
             }
@@ -93,7 +93,7 @@ public struct BusStatusMenuView: View {
                 Label("두 번째 버스", systemImage: "bus")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
-                Text(viewModel.currentSecondBusText)
+                Text(viewModel.secondBusText(for: viewModel.selectedBus))
                     .font(.system(.body, design: .rounded))
             }
             .padding(8)

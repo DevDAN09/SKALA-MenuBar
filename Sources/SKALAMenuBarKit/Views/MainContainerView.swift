@@ -1,16 +1,12 @@
 import SwiftUI
-import AppKit
 
-public enum MainMenuTab: String, CaseIterable, Identifiable {
-    case bus = "버스 도착"
-    case cafeteria = "구내식당"
+public enum MainMenuTab: CaseIterable {
+    case bus, cafeteria
 
-    public var id: String { rawValue }
-
-    public var icon: String {
+    var title: String {
         switch self {
-        case .bus: return "bus.fill"
-        case .cafeteria: return "fork.knife"
+        case .bus: return "버스"
+        case .cafeteria: return "식당"
         }
     }
 }
@@ -18,54 +14,44 @@ public enum MainMenuTab: String, CaseIterable, Identifiable {
 @MainActor
 public struct MainContainerView: View {
     @ObservedObject var busViewModel: BusViewModel
-    @StateObject var cafeteriaViewModel: CafeteriaViewModel
+    @ObservedObject var cafeteriaViewModel: CafeteriaViewModel
     @State private var selectedTab: MainMenuTab = .bus
 
     public init(
         busViewModel: BusViewModel,
-        cafeteriaViewModel: CafeteriaViewModel? = nil
+        cafeteriaViewModel: CafeteriaViewModel
     ) {
         self.busViewModel = busViewModel
-        _cafeteriaViewModel = StateObject(wrappedValue: cafeteriaViewModel ?? CafeteriaViewModel())
+        self.cafeteriaViewModel = cafeteriaViewModel
     }
 
     public var body: some View {
         VStack(spacing: 0) {
-            // Top 2 Main Tab Buttons
             HStack(spacing: 8) {
-                Button {
-                    selectedTab = .bus
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "bus.fill")
-                            .font(.system(size: 13))
-                        Text("버스")
-                            .font(.system(size: 13, weight: selectedTab == .bus ? .bold : .medium))
+                ForEach(MainMenuTab.allCases, id: \.self) { tab in
+                    let isSelected = selectedTab == tab
+                    Button {
+                        selectedTab = tab
+                    } label: {
+                        HStack(spacing: 6) {
+                            if tab == .bus {
+                                Image(systemName: "bus.fill")
+                                    .font(.system(size: 13))
+                            } else {
+                                Text("🍱")
+                                    .font(.system(size: 13))
+                            }
+                            Text(tab.title)
+                                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 7)
+                        .background(isSelected ? Color.accentColor : Color.secondary.opacity(0.12))
+                        .foregroundColor(isSelected ? .white : .primary)
+                        .cornerRadius(8)
                     }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 7)
-                    .background(selectedTab == .bus ? Color.accentColor : Color.secondary.opacity(0.12))
-                    .foregroundColor(selectedTab == .bus ? .white : .primary)
-                    .cornerRadius(8)
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
-
-                Button {
-                    selectedTab = .cafeteria
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("🍱")
-                            .font(.system(size: 13))
-                        Text("식당")
-                            .font(.system(size: 13, weight: selectedTab == .cafeteria ? .bold : .medium))
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 7)
-                    .background(selectedTab == .cafeteria ? Color.accentColor : Color.secondary.opacity(0.12))
-                    .foregroundColor(selectedTab == .cafeteria ? .white : .primary)
-                    .cornerRadius(8)
-                }
-                .buttonStyle(.plain)
             }
             .padding(.horizontal, 14)
             .padding(.top, 12)
@@ -73,7 +59,6 @@ public struct MainContainerView: View {
 
             Divider()
 
-            // Tab Content
             switch selectedTab {
             case .bus:
                 BusStatusMenuView(viewModel: busViewModel)

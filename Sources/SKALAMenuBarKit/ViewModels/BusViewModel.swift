@@ -23,10 +23,10 @@ public final class BusViewModel: ObservableObject {
         }
     }
 
-    private let apiService: BusAPIServiceProtocol
+    private let apiService: BusAPIService
     private var timer: Timer?
 
-    public init(apiService: BusAPIServiceProtocol = BusAPIService.shared, refreshInterval: Int = 30) {
+    public init(apiService: BusAPIService = BusAPIService(), refreshInterval: Int = 30) {
         self.apiService = apiService
         self.refreshIntervalSeconds = refreshInterval
 
@@ -64,13 +64,13 @@ public final class BusViewModel: ObservableObject {
             self.menuTitle = formatMenuTitle(arrivals[selectedBus])
         } catch {
             self.errorMessage = error.localizedDescription
-            self.menuTitle = "⚠️ \(selectedBus.shortName): 확인 실패"
+            self.menuTitle = "⚠️ \(selectedBus.rawValue): 확인 실패"
         }
         isLoading = false
     }
 
     public func formatMenuTitle(_ details: BusArrivalDetails?) -> String {
-        let busName = selectedBus.shortName
+        let busName = selectedBus.rawValue
         guard let details = details, let seconds = details.arrivalTime, seconds > 0 else {
             return "🚌 \(busName): 정보 없음"
         }
@@ -86,45 +86,33 @@ public final class BusViewModel: ObservableObject {
     }
 
     public func firstBusText(for bus: TargetBus) -> String {
-        guard let arrival = allArrivals[bus], let seconds = arrival.arrivalTime, seconds > 0 else {
-            return "도착 정보 없음 (차고지 대기 또는 운행 종료)"
-        }
-        let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
-        let stops = arrival.busStopCount.map { "\($0)정류장 전" } ?? ""
-        let plate = arrival.vehicleNumber.map { " [\($0)]" } ?? ""
-        return "약 \(minutes)분 뒤 도착 (\(stops))\(plate)"
+        arrivalLine(
+            seconds: allArrivals[bus]?.arrivalTime,
+            stopCount: allArrivals[bus]?.busStopCount,
+            plate: allArrivals[bus]?.vehicleNumber,
+            empty: "도착 정보 없음 (차고지 대기 또는 운행 종료)"
+        )
     }
 
     public func secondBusText(for bus: TargetBus) -> String {
-        guard let arrival = allArrivals[bus], let seconds = arrival.arrivalTime2, seconds > 0 else {
-            return "다음 버스 도착 정보 없음"
-        }
-        let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
-        let stops = arrival.busStopCount2.map { "\($0)정류장 전" } ?? ""
-        let plate = arrival.vehicleNumber2.map { " [\($0)]" } ?? ""
-        return "약 \(minutes)분 뒤 도착 (\(stops))\(plate)"
-    }
-
-    public var currentFirstBusText: String {
-        firstBusText(for: selectedBus)
-    }
-
-    public var currentSecondBusText: String {
-        secondBusText(for: selectedBus)
-    }
-
-    public var currentStopName: String {
-        selectedBus.stopName
-    }
-
-    public var currentDirectionHint: String {
-        selectedBus.directionHint
+        arrivalLine(
+            seconds: allArrivals[bus]?.arrivalTime2,
+            stopCount: allArrivals[bus]?.busStopCount2,
+            plate: allArrivals[bus]?.vehicleNumber2,
+            empty: "다음 버스 도착 정보 없음"
+        )
     }
 
     public var lastUpdatedString: String {
-        guard let lastUpdated = lastUpdated else { return "업데이트 안 됨" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "HH:mm:ss"
-        return formatter.string(from: lastUpdated)
+        guard let lastUpdated else { return "업데이트 안 됨" }
+        return lastUpdated.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute().second())
+    }
+
+    private func arrivalLine(seconds: Int?, stopCount: Int?, plate: String?, empty: String) -> String {
+        guard let seconds, seconds > 0 else { return empty }
+        let minutes = max(1, Int(ceil(Double(seconds) / 60.0)))
+        let stops = stopCount.map { "\($0)정류장 전" } ?? ""
+        let plateText = plate.map { " [\($0)]" } ?? ""
+        return "약 \(minutes)분 뒤 도착 (\(stops))\(plateText)"
     }
 }
