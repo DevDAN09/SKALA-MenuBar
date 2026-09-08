@@ -4,6 +4,15 @@ SK AX 판교캠퍼스 인근(**SK플래닛·판교디지털센터**, **이노밸
 
 ---
 
+## 📥 최신 버전 다운로드 (macOS)
+
+👉 **[최신 SKALA-MenuBar 설치 패키지 다운로드 (.pkg)](https://github.com/DevDAN09/SKALA-MenuBar/releases/latest/download/SKALA-MenuBar.pkg)**
+
+- **모든 릴리즈 목록**: [GitHub Releases](https://github.com/DevDAN09/SKALA-MenuBar/releases)
+- **설치 안내**: 패키지(`.pkg`) 다운로드 후 더블 클릭하여 설치하면 `/Applications/SKALA-MenuBar.app`에 자동 설치되며, Gatekeeper 격리 해제(`xattr -cr`) 스크립트가 내장되어 있어 별도 터미널 명령 없이 바로 실행 가능합니다.
+
+---
+
 ## ✨ 주요 기능
 - **실시간 메뉴바 상태 표시**:
   - `🚌 9007: 12분 (8전)` (일반 도착 예정)
@@ -13,8 +22,8 @@ SK AX 판교캠퍼스 인근(**SK플래닛·판교디지털센터**, **이노밸
   - `[🚌 버스]` `[🍱 식당]` 원클릭 직관적 화면 전환
 - **🍱 이노밸리 구내식당 식단표 분석**:
   - 카카오톡 채널(`pf.kakao.com/_LCxlxlxb`)의 최신 주간 식단표 이미지를 자동 수집
-  - macOS 내장 **Apple Vision OCR (2x 고화질 보간)**을 통해 한식/양식/면/샐러드바 등 전 코너 100% 정합성 자동 분류
-  - 요일별(월~금) 및 식사별(조식/중식/석식) 탭 탐색, 현재 시간 및 오늘 요일 자동 매칭
+  - macOS 내장 **Apple Vision OCR (3x 초고화질 업스케일링 & 명암 전처리 & 특화 사전)**을 통해 한식/양식/면/샐러드바 등 전 코너 100% 정합성 자동 분류
+  - 요일별(월~금), 코너별(한식/양식/면) 탭 탐색, 현재 시간 및 오늘 요일 자동 매칭
   - 주간 식단 로컬 캐시로 초고속(0초) 로딩 및 원본 이미지 링크 제공
 - **단축키 지원**:
   - `⌘R`: 지금 즉시 새로고침
@@ -75,6 +84,6 @@ macOS 표준 설치 프로그램(`.pkg`)을 만들어 다른 Mac에 배포하거
 
 ## 🛠️ 테스트 실행
 ```bash
-swift run SKALA-MenuBarTests
+swift run SKALAMenuBarTests
 ```
 
