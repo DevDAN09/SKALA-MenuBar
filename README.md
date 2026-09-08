@@ -4,12 +4,24 @@ SK AX 판교캠퍼스 인근(**SK플래닛·판교디지털센터**, **이노밸
 
 ---
 
-## 📥 최신 버전 다운로드 (macOS)
+## 📥 최신 버전 다운로드 및 설치 (macOS)
+
+### ⚡ 가장 추천: 터미널 1초 원클릭 자동 설치 (보안 경고 없음)
+Gatekeeper 경고 없이 가장 간편하게 설치하고 실행하는 방법입니다. 터미널에서 아래 명령어를 복사하여 실행하세요:
+```bash
+curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/dev/scripts/install.sh | bash
+```
+> **자동 처리 항목**: 최신 패키지 다운로드 ➡️ macOS 보안 격리 속성(`quarantine`) 자동 해제 ➡️ 기존 구버전 프로세스 종료 ➡️ `/Applications` 설치 ➡️ 앱 즉시 실행
+
+---
+
+### 📦 수동 패키지 다운로드 (.pkg)
 
 👉 **[최신 SKALA-MenuBar 설치 패키지 다운로드 (.pkg)](https://github.com/DevDAN09/SKALA-MenuBar/releases/latest/download/SKALA-MenuBar.pkg)**
 
 - **모든 릴리즈 목록**: [GitHub Releases](https://github.com/DevDAN09/SKALA-MenuBar/releases)
-- **설치 안내**: 패키지(`.pkg`) 다운로드 후 더블 클릭하여 설치하면 `/Applications/SKALA-MenuBar.app`에 자동 설치되며, Gatekeeper 격리 해제(`xattr -cr`) 스크립트가 내장되어 있어 별도 터미널 명령 없이 바로 실행 가능합니다.
+- **💡 파일 더블클릭 시 "악성 코드가 없음을 확인할 수 없습니다" 경고가 뜨는 경우**:
+  - macOS 보안 정책으로 인한 현상입니다. 위의 **터미널 원클릭 자동 설치 명령어**를 사용하시거나, Mac의 **[시스템 설정] ➡️ [개인정보 보호 및 보안]** 하단에서 **[확인 없이 열기]** 버튼을 클릭하시면 설치가 진행됩니다.
 
 ---
 
