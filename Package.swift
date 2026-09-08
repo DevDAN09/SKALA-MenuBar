@@ -5,7 +5,6 @@ let package = Package(
     name: "SKALAMenuBar",
     platforms: [.macOS(.v13)],
     products: [
-        .library(name: "SKALAMenuBarKit", targets: ["SKALAMenuBarKit"]),
         .executable(name: "SKALA-MenuBar", targets: ["SKALAMenuBar"]),
         .executable(name: "SKALAMenuBarTests", targets: ["SKALAMenuBarTests"])
     ],

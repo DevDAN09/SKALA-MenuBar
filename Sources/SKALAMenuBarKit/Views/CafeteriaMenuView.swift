@@ -1,5 +1,4 @@
 import SwiftUI
-import AppKit
 
 public struct CafeteriaMenuView: View {
     @ObservedObject var viewModel: CafeteriaViewModel

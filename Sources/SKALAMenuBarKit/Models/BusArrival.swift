@@ -15,10 +15,6 @@ public enum TargetBus: String, CaseIterable, Identifiable, Codable, Sendable {
         }
     }
 
-    public var shortName: String {
-        rawValue
-    }
-
     public var stopId: String {
         switch self {
         case .bus9007:
@@ -74,20 +70,16 @@ public struct BusStopResponse: Codable, Sendable {
 public struct BusLine: Codable, Sendable {
     public let id: String
     public let name: String
-    public let busLineType: String?
     public let arrival: BusArrivalDetails?
 
-    public init(id: String, name: String, busLineType: String? = nil, arrival: BusArrivalDetails? = nil) {
+    public init(id: String, name: String, arrival: BusArrivalDetails? = nil) {
         self.id = id
         self.name = name
-        self.busLineType = busLineType
         self.arrival = arrival
     }
 }
 
 public struct BusArrivalDetails: Codable, Sendable {
-    public let direction: String?
-    public let nextBusStopName: String?
     public let vehicleNumber: String?
     public let arrivalTime: Int?
     public let busStopCount: Int?
@@ -96,8 +88,6 @@ public struct BusArrivalDetails: Codable, Sendable {
     public let busStopCount2: Int?
 
     public init(
-        direction: String? = nil,
-        nextBusStopName: String? = nil,
         vehicleNumber: String? = nil,
         arrivalTime: Int? = nil,
         busStopCount: Int? = nil,
@@ -105,8 +95,6 @@ public struct BusArrivalDetails: Codable, Sendable {
         arrivalTime2: Int? = nil,
         busStopCount2: Int? = nil
     ) {
-        self.direction = direction
-        self.nextBusStopName = nextBusStopName
         self.vehicleNumber = vehicleNumber
         self.arrivalTime = arrivalTime
         self.busStopCount = busStopCount
