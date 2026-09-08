@@ -1,12 +1,15 @@
-name: Build & Upload PKG to Google Drive
+name: Build & Release PKG
 
 on:
   push:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build-and-upload:
+  build-and-release:
     runs-on: macos-14
     steps:
       - name: Checkout Code
@@ -17,10 +20,13 @@ jobs:
           swift run SKALAMenuBarTests
 
       - name: Build macOS PKG
+        id: build_pkg
         run: |
           chmod +x ./scripts/build_pkg.sh
           chmod +x ./scripts/pkg_scripts/postinstall
           ./scripts/build_pkg.sh
+          VERSION=$(grep '^VERSION=' ./scripts/build_pkg.sh | cut -d'"' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Upload PKG as GitHub Artifact
         uses: actions/upload-artifact@v4
@@ -29,18 +35,13 @@ jobs:
           path: dist/*.pkg
           retention-days: 14
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          python-version: '3.11'
-
-      - name: Install Google Drive API Dependencies
-        run: |
-          pip install google-api-python-client google-auth
-
-      - name: Upload PKG to Google Drive
+          tag_name: v${{ steps.build_pkg.outputs.version }}
+          name: Release v${{ steps.build_pkg.outputs.version }}
+          files: dist/*.pkg
+          generate_release_notes: true
+          make_latest: true
         env:
-          GDRIVE_SERVICE_ACCOUNT_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
-          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
-        run: |
-          python3 ./scripts/upload_to_gdrive.py
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

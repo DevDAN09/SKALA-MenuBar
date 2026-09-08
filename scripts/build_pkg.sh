@@ -83,6 +83,9 @@ pkgbuild --root "$ROOT_DIR" \
 # 생성된 패키지 자체의 확장 속성 정리
 xattr -cr "$PKG_OUTPUT" 2>/dev/null || true
 
+# 최신 고정 파일명으로도 복사 (SKALA-MenuBar.pkg)
+cp "$PKG_OUTPUT" "$DIST_DIR/${APP_NAME}.pkg"
+
 echo ""
 echo "🎉 빌드 완료!"
 echo "📍 생성된 패키지: $PKG_OUTPUT"
