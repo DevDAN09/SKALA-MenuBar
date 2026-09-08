@@ -1,0 +1,46 @@
+name: Build & Upload PKG to Google Drive
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-upload:
+    runs-on: macos-14
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Run Tests
+        run: |
+          swift run SKALAMenuBarTests
+
+      - name: Build macOS PKG
+        run: |
+          chmod +x ./scripts/build_pkg.sh
+          chmod +x ./scripts/pkg_scripts/postinstall
+          ./scripts/build_pkg.sh
+
+      - name: Upload PKG as GitHub Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SKALA-MenuBar-pkg
+          path: dist/*.pkg
+          retention-days: 14
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Google Drive API Dependencies
+        run: |
+          pip install google-api-python-client google-auth
+
+      - name: Upload PKG to Google Drive
+        env:
+          GDRIVE_SERVICE_ACCOUNT_KEY: ${{ secrets.GDRIVE_SERVICE_ACCOUNT_KEY }}
+          GDRIVE_FOLDER_ID: ${{ secrets.GDRIVE_FOLDER_ID }}
+        run: |
+          python3 ./scripts/upload_to_gdrive.py

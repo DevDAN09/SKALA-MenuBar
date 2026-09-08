@@ -7,6 +7,7 @@ public final class CafeteriaViewModel: ObservableObject {
     @Published public var weeklyMenu: WeeklyMenu?
     @Published public var selectedWeekday: String
     @Published public var selectedMealType: MealType
+    @Published public var selectedCorner: MealCorner = .korean
     @Published public var isLoading: Bool = false
     @Published public var errorMessage: String?
 
@@ -56,12 +57,11 @@ public final class CafeteriaViewModel: ObservableObject {
         let minute = Calendar.current.component(.minute, from: Date())
         let totalMinutes = hour * 60 + minute
 
-        if totalMinutes < 570 {
-            return .breakfast
-        } else if totalMinutes < 870 {
-            return .lunch
-        } else {
+        // 14:30(870분) 이후는 석식, 이전은 중식
+        if totalMinutes >= 870 {
             return .dinner
+        } else {
+            return .lunch
         }
     }
 }

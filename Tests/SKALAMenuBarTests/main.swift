@@ -137,7 +137,9 @@ func testCafeteriaMenuModels() {
 func testCafeteriaViewModelDefaults() {
     let vm = CafeteriaViewModel()
     assert(["월", "화", "수", "목", "금"].contains(vm.selectedWeekday), "Default weekday should be valid")
-    assert(MealType.allCases.contains(vm.selectedMealType), "Default meal type should be valid")
+    assert(MealType.allCases == [.lunch, .dinner], "MealType should only contain lunch and dinner")
+    assert(MealCorner.allCases == [.korean, .western, .noodle], "MealCorner should contain korean, western, noodle")
+    assert(vm.selectedCorner == .korean, "Default corner should be korean")
     print("✅ testCafeteriaViewModelDefaults passed")
 }
 

@@ -1,7 +1,6 @@
 import Foundation
 
 public enum MealType: String, CaseIterable, Codable, Identifiable, Sendable {
-    case breakfast = "조식"
     case lunch = "중식"
     case dinner = "석식"
 
@@ -9,7 +8,6 @@ public enum MealType: String, CaseIterable, Codable, Identifiable, Sendable {
 
     public var icon: String {
         switch self {
-        case .breakfast: return "sun.and.horizon.fill"
         case .lunch: return "sun.max.fill"
         case .dinner: return "moon.stars.fill"
         }
@@ -17,9 +15,24 @@ public enum MealType: String, CaseIterable, Codable, Identifiable, Sendable {
 
     public var operatingHours: String {
         switch self {
-        case .breakfast: return "07:40 - 09:00"
         case .lunch: return "11:30 - 14:00"
         case .dinner: return "17:20 - 18:40"
+        }
+    }
+}
+
+public enum MealCorner: String, CaseIterable, Codable, Identifiable, Sendable {
+    case korean = "한식"
+    case western = "양식"
+    case noodle = "면"
+
+    public var id: String { rawValue }
+
+    public var icon: String {
+        switch self {
+        case .korean: return "🍚"
+        case .western: return "🍳"
+        case .noodle: return "🍜"
         }
     }
 }
@@ -46,7 +59,7 @@ public struct DailyMenu: Codable, Identifiable, Sendable, Equatable {
     public init(
         weekday: String,
         dateString: String,
-        breakfast: [MealCategoryItem],
+        breakfast: [MealCategoryItem] = [],
         lunch: [MealCategoryItem],
         dinner: [MealCategoryItem]
     ) {
@@ -59,7 +72,6 @@ public struct DailyMenu: Codable, Identifiable, Sendable, Equatable {
 
     public func meals(for type: MealType) -> [MealCategoryItem] {
         switch type {
-        case .breakfast: return breakfast
         case .lunch: return lunch
         case .dinner: return dinner
         }

@@ -47,16 +47,29 @@ pkill -f SKALA-MenuBar
 
 ---
 
-## 📦 배포용 패키지(.pkg) 생성
+## 📦 배포용 패키지(.pkg) 생성 및 설치
 
 macOS 표준 설치 프로그램(`.pkg`)을 만들어 다른 Mac에 배포하거나 더블 클릭으로 간편하게 설치할 수 있습니다:
 
 ```bash
 ./scripts/build_pkg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.1.0.pkg` (~220KB)
-- 설치 위치: `/Applications/SKALA-MenuBar.app` (더블 클릭 시 macOS 표준 설치 마법사 진행)
-- 메뉴바 전용(`LSUIElement: true`)으로 백그라운드에 가볍게 실행됩니다.
+- 생성 위치: `dist/SKALA-MenuBar-1.1.3.pkg`
+- 설치 위치: `/Applications/SKALA-MenuBar.app`
+- **보안 격리 자동 해제 내장**: 패키지 설치 시 `postinstall` 스크립트가 실행되어 앱의 Gatekeeper 격리 속성(`com.apple.quarantine`)을 자동으로 제거합니다.
+
+### 💡 타 사용자 배포 시 "확인되지 않은 개발자" 경고 해결법
+메신저나 브라우저로 다운로드한 `.pkg` 파일 자체에 macOS 격리 속성이 붙은 경우:
+1. **우클릭으로 열기 (가장 간단)**: `.pkg` 파일을 **우클릭(Control+클릭) ➡️ [열기] ➡️ [열기]** 버튼 클릭
+2. **터미널에서 격리 해제 후 실행**:
+   ```bash
+   xattr -d com.apple.quarantine SKALA-MenuBar-*.pkg
+   open SKALA-MenuBar-*.pkg
+   ```
+3. **터미널 원클릭 설치**:
+   ```bash
+   sudo installer -pkg SKALA-MenuBar-*.pkg -target /
+   ```
 
 ---
 

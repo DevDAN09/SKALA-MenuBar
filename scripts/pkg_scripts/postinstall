@@ -1,0 +1,4 @@
+#!/bin/bash
+# Remove quarantine attribute from the installed app so Gatekeeper won't block it
+xattr -cr "/Applications/SKALA-MenuBar.app" 2>/dev/null || true
+exit 0
