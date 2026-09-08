@@ -1,0 +1,4 @@
+#!/bin/bash
+# Terminate existing running instance if any
+killall SKALA-MenuBar 2>/dev/null || true
+exit 0

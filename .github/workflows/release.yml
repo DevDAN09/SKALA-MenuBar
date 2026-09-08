@@ -23,7 +23,7 @@ jobs:
         id: build_pkg
         run: |
           chmod +x ./scripts/build_pkg.sh
-          chmod +x ./scripts/pkg_scripts/postinstall
+          chmod +x ./scripts/pkg_scripts/*
           ./scripts/build_pkg.sh
           VERSION=$(grep '^VERSION=' ./scripts/build_pkg.sh | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
