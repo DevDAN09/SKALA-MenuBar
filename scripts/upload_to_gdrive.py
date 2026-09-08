@@ -53,7 +53,22 @@ def upload():
         except Exception as auth_err:
             print(f"⚠️ Could not fetch user info: {auth_err}")
 
-        # 2. Check folder access and capabilities
+        # 2. Check all visible folders for this service account
+        try:
+            visible_res = service.files().list(
+                q="mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+                fields="files(id, name)",
+                supportsAllDrives=True,
+                includeItemsFromAllDrives=True
+            ).execute()
+            visible_folders = visible_res.get("files", [])
+            print(f"📂 Service account can see {len(visible_folders)} folder(s):")
+            for f in visible_folders:
+                print(f"   - {f.get('name')} (ID: {f.get('id')})")
+        except Exception as list_err:
+            print(f"⚠️ Could not list visible folders: {list_err}")
+
+        # 3. Check folder access and capabilities
         try:
             folder = service.files().get(
                 fileId=folder_id,
