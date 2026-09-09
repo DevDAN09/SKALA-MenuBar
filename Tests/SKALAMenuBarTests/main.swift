@@ -162,6 +162,55 @@ func testCafeteriaLiveFetchAndParse() async throws {
     print("✅ testCafeteriaLiveFetchAndParse passed")
 }
 
+func testCommuteServiceKSTCheckOutGate() {
+    let service = CommuteService()
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = TimeZone(identifier: "Asia/Seoul")!
+
+    // 17:49:59 KST -> false
+    var comps = DateComponents(year: 2026, month: 9, day: 9, hour: 17, minute: 49, second: 59)
+    let beforeDate = cal.date(from: comps)!
+    assert(!service.isCheckOutAllowed(at: beforeDate), "17:49:59 KST should NOT allow checkout")
+    let remaining = service.timeUntilCheckOut(at: beforeDate)
+    assert(remaining?.minutes == 0 && remaining?.seconds == 1, "Remaining time should be 1 second")
+
+    // 17:50:00 KST -> true
+    comps.minute = 50
+    comps.second = 0
+    let exactDate = cal.date(from: comps)!
+    assert(service.isCheckOutAllowed(at: exactDate), "17:50:00 KST should allow checkout")
+    assert(service.timeUntilCheckOut(at: exactDate) == nil, "Remaining time should be nil after 17:50")
+
+    // 09:00:00 KST -> false
+    comps.hour = 9
+    comps.minute = 0
+    let morningDate = cal.date(from: comps)!
+    assert(!service.isCheckOutAllowed(at: morningDate), "09:00:00 KST should NOT allow checkout")
+
+    // 16:50:00 KST -> false, 1 hour 0 min 0 sec remaining
+    comps.hour = 16
+    comps.minute = 50
+    comps.second = 0
+    let oneHourBefore = cal.date(from: comps)!
+    assert(!service.isCheckOutAllowed(at: oneHourBefore), "16:50:00 KST should NOT allow checkout")
+    let rem1h = service.timeUntilCheckOut(at: oneHourBefore)
+    assert(rem1h?.hours == 1 && rem1h?.minutes == 0 && rem1h?.seconds == 0, "Remaining time should be exactly 1 hour")
+
+    // 18:30:00 KST -> true, nil remaining
+    comps.hour = 18
+    comps.minute = 30
+    comps.second = 0
+    let eveningDate = cal.date(from: comps)!
+    assert(service.isCheckOutAllowed(at: eveningDate), "18:30:00 KST should allow checkout")
+    assert(service.timeUntilCheckOut(at: eveningDate) == nil, "Remaining time should be nil after 17:50")
+
+    // Target constants verification
+    assert(service.targetSSID == "skaxedu", "SSID should match targetSSID")
+    assert(service.targetURL == URL(string: "https://att.skala-ai.com/att-checkin")!, "targetURL mismatch")
+
+    print("✅ testCommuteServiceKSTCheckOutGate passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -170,6 +219,7 @@ func main() async {
         testCafeteriaMenuModels()
         await testCafeteriaViewModelDefaults()
         try await testCafeteriaLiveFetchAndParse()
+        testCommuteServiceKSTCheckOutGate()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
