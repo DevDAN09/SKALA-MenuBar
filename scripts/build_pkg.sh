@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 APP_NAME="SKALA-MenuBar"
-VERSION="1.2.0"
+VERSION="1.2.1"
 BUNDLE_ID="com.skala.menubar"
 DIST_DIR="$PROJECT_ROOT/dist"
 ROOT_DIR="$DIST_DIR/root"
@@ -56,7 +56,7 @@ cat << PLIST > "$APP_BUNDLE/Contents/Info.plist"
     <key>CFBundleShortVersionString</key>
     <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>5</string>
+    <string>6</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>LSUIElement</key>
