@@ -425,6 +425,30 @@ func testCommuteMenuView() {
     print("✅ testCommuteMenuView passed")
 }
 
+@MainActor
+func testMainMenuTabAndContainerView() {
+    assert(MainMenuTab.allCases == [.bus, .cafeteria, .commute], "MainMenuTab.allCases must be [.bus, .cafeteria, .commute]")
+    assert(MainMenuTab.bus.title == "버스", "bus title mismatch")
+    assert(MainMenuTab.cafeteria.title == "식당", "cafeteria title mismatch")
+    assert(MainMenuTab.commute.title == "출퇴근", "commute title mismatch")
+
+    let busVM = BusViewModel(apiService: BusAPIService(session: makeMockBusSession()))
+    busVM.stopAutoRefresh()
+    let cafeVM = CafeteriaViewModel()
+    let mockCommuteService = MockCommuteService()
+    let mockCommuteNotifService = MockCommuteNotificationService()
+    let commuteVM = CommuteViewModel(service: mockCommuteService, notificationService: mockCommuteNotifService)
+    commuteVM.stopTimer()
+
+    let containerView = MainContainerView(
+        busViewModel: busVM,
+        cafeteriaViewModel: cafeVM,
+        commuteViewModel: commuteVM
+    )
+    _ = containerView.body
+    print("✅ testMainMenuTabAndContainerView passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -440,6 +464,7 @@ func main() async {
         await testCommuteViewModelInitialState()
         await testCommuteViewModelLogic()
         await testCommuteMenuView()
+        await testMainMenuTabAndContainerView()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
