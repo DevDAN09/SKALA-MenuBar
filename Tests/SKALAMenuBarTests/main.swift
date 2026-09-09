@@ -479,6 +479,14 @@ func testMainMenuTabAndContainerView() {
         commuteViewModel: commuteVM
     )
     _ = containerView.body
+
+    let hostingView = NSHostingView(rootView: containerView)
+    assert(hostingView.fittingSize.width == 320.0, "Container width should be 320")
+    assert(hostingView.fittingSize.height == 560.0, "Container height should be fixed at 560 to prevent island detachment")
+
+    let helperHosting = NSHostingView(rootView: WindowAnchorHelper())
+    _ = helperHosting.fittingSize
+
     print("✅ testMainMenuTabAndContainerView passed")
 }
 

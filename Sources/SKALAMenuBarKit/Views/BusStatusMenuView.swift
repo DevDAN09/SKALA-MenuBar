@@ -107,6 +107,8 @@ public struct BusStatusMenuView: View {
                     .foregroundColor(.red)
             }
 
+            Spacer()
+
             Divider()
 
             // Controls & Footer
@@ -144,5 +146,6 @@ public struct BusStatusMenuView: View {
         }
         .padding(14)
         .frame(width: 320)
+        .frame(maxHeight: .infinity)
     }
 }

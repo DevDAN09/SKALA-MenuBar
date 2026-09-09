@@ -121,95 +121,98 @@ public struct CafeteriaMenuView: View {
 
             Divider()
 
-            // Menu Content List (고정 높이)
-            VStack(alignment: .leading, spacing: 8) {
-                if let dayMenu = viewModel.currentDayMenu {
-                    let categories = dayMenu.meals(for: viewModel.selectedMealType)
+            // Menu Content List (유연한 스크롤 영역)
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 8) {
+                    if let dayMenu = viewModel.currentDayMenu {
+                        let categories = dayMenu.meals(for: viewModel.selectedMealType)
 
-                    if categories.isEmpty {
-                        VStack(spacing: 8) {
-                            Image(systemName: "fork.knife")
-                                .font(.title2)
-                                .foregroundColor(.secondary)
-                            Text("등록된 식단 정보가 없습니다.")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 24)
-                    } else if viewModel.selectedMealType == .lunch {
-                        let matched = categories.filter { cat in
-                            switch viewModel.selectedCorner {
-                            case .korean:
-                                return cat.cornerName.contains("한식")
-                            case .western:
-                                return cat.cornerName.contains("양식") || cat.cornerName.contains("일품")
-                            case .noodle:
-                                return cat.cornerName.contains("면") || cat.cornerName.contains("특식")
-                            }
-                        }
-                        let saladCategories = categories.filter { cat in
-                            cat.cornerName.contains("샐러드") || cat.cornerName.contains("디저트")
-                        }
-
-                        if matched.isEmpty && saladCategories.isEmpty {
+                        if categories.isEmpty {
                             VStack(spacing: 8) {
-                                Text("해당 코너 식단 정보가 없습니다.")
+                                Image(systemName: "fork.knife")
+                                    .font(.title2)
+                                    .foregroundColor(.secondary)
+                                Text("등록된 식단 정보가 없습니다.")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 24)
+                        } else if viewModel.selectedMealType == .lunch {
+                            let matched = categories.filter { cat in
+                                switch viewModel.selectedCorner {
+                                case .korean:
+                                    return cat.cornerName.contains("한식")
+                                case .western:
+                                    return cat.cornerName.contains("양식") || cat.cornerName.contains("일품")
+                                case .noodle:
+                                    return cat.cornerName.contains("면") || cat.cornerName.contains("특식")
+                                }
+                            }
+                            let saladCategories = categories.filter { cat in
+                                cat.cornerName.contains("샐러드") || cat.cornerName.contains("디저트")
+                            }
+
+                            if matched.isEmpty && saladCategories.isEmpty {
+                                VStack(spacing: 8) {
+                                    Text("해당 코너 식단 정보가 없습니다.")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 24)
+                            } else {
+                                ForEach(matched) { category in
+                                    cornerCard(category)
+                                }
+                                ForEach(saladCategories) { salad in
+                                    saladCard(salad)
+                                }
+                            }
                         } else {
-                            ForEach(matched) { category in
+                            // 석식
+                            if viewModel.selectedCorner != .korean {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "info.circle")
+                                        .font(.system(size: 10))
+                                    Text("석식은 '한식/일품' 코너로 운영됩니다.")
+                                        .font(.caption2)
+                                }
+                                .foregroundColor(.secondary)
+                                .padding(.bottom, 2)
+                            }
+
+                            ForEach(categories) { category in
                                 cornerCard(category)
                             }
-                            ForEach(saladCategories) { salad in
-                                saladCard(salad)
-                            }
                         }
+                    } else if viewModel.isLoading {
+                        VStack(spacing: 8) {
+                            ProgressView()
+                            Text("식단표 이미지 분석 중...")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 24)
                     } else {
-                        // 석식
-                        if viewModel.selectedCorner != .korean {
-                            HStack(spacing: 4) {
-                                Image(systemName: "info.circle")
-                                    .font(.system(size: 10))
-                                Text("석식은 '한식/일품' 코너로 운영됩니다.")
+                        VStack(spacing: 6) {
+                            Text("식단표를 불러오지 못했습니다.")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            if let error = viewModel.errorMessage {
+                                Text(error)
                                     .font(.caption2)
+                                    .foregroundColor(.red)
                             }
-                            .foregroundColor(.secondary)
-                            .padding(.bottom, 2)
                         }
-
-                        ForEach(categories) { category in
-                            cornerCard(category)
-                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 20)
                     }
-                } else if viewModel.isLoading {
-                    VStack(spacing: 8) {
-                        ProgressView()
-                        Text("식단표 이미지 분석 중...")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 24)
-                } else {
-                    VStack(spacing: 6) {
-                        Text("식단표를 불러오지 못했습니다.")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        if let error = viewModel.errorMessage {
-                            Text(error)
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 20)
                 }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            .frame(height: 315, alignment: .top)
+            .frame(maxHeight: .infinity, alignment: .top)
 
             Divider()
 
@@ -236,6 +239,8 @@ public struct CafeteriaMenuView: View {
             }
         }
         .padding(14)
+        .frame(width: 320)
+        .frame(maxHeight: .infinity)
     }
 
     @ViewBuilder
