@@ -122,40 +122,58 @@ public struct CommuteMenuView: View {
                 .disabled(!viewModel.isCheckOutAllowed)
             }
 
-            // 4. Notification Footer Info
-            HStack(spacing: 6) {
-                if viewModel.isNotificationAuthorized {
-                    Image(systemName: "bell.badge.fill")
-                        .font(.caption2)
-                        .foregroundColor(.green)
-                    Text("평일 08:50 / 17:50 알림 활성화됨")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                } else {
-                    Image(systemName: "bell.slash")
-                        .font(.caption2)
-                        .foregroundColor(.orange)
-                    Text("평일 알림 미등록")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-
-                    Spacer()
-
-                    Button {
-                        Task {
-                            await viewModel.requestNotificationPermission()
-                        }
-                    } label: {
-                        Text("알림 켜기")
-                            .font(.system(size: 10, weight: .semibold))
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Color.accentColor.opacity(0.15))
-                            .foregroundColor(.accentColor)
-                            .cornerRadius(4)
-                    }
-                    .buttonStyle(.plain)
+            // 4. Tabling Spaces Shortcut Button
+            Button {
+                if let url = URL(string: "https://tabling.skala-ai.com/spaces") {
+                    NSWorkspace.shared.open(url)
                 }
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "chair.lounge.fill")
+                        .font(.system(size: 11))
+                        .foregroundColor(.accentColor)
+                    Text("공간 예약 바로가기 (Tabling)")
+                        .font(.system(size: 11, weight: .medium))
+                    Spacer()
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.system(size: 10))
+                        .foregroundColor(.secondary)
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(Color.secondary.opacity(0.08))
+                .cornerRadius(6)
+            }
+            .buttonStyle(.plain)
+
+            Divider()
+                .padding(.vertical, 2)
+
+            // 5. Notification Switch (Toggle) Footer
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: viewModel.isReminderEnabled ? "bell.badge.fill" : "bell.slash")
+                        .font(.caption)
+                        .foregroundColor(viewModel.isReminderEnabled ? (viewModel.isNotificationAuthorized ? .green : .orange) : .secondary)
+
+                    VStack(alignment: .leading, spacing: 1) {
+                        Text("평일 출퇴근 알림 (08:50 / 17:50)")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                        if viewModel.isReminderEnabled && !viewModel.isNotificationAuthorized {
+                            Text("시스템 알림 권한 허용 필요")
+                                .font(.caption2)
+                                .foregroundColor(.orange)
+                        }
+                    }
+                }
+
+                Spacer()
+
+                Toggle("", isOn: $viewModel.isReminderEnabled)
+                    .toggleStyle(.switch)
+                    .labelsHidden()
+                    .controlSize(.mini)
             }
             .padding(.top, 2)
         }

@@ -10,6 +10,27 @@ public final class CommuteViewModel: ObservableObject {
     @Published public private(set) var isCheckingNetwork: Bool = false
     @Published public private(set) var isNotificationAuthorized: Bool = false
 
+    private static let reminderEnabledKey = "isCommuteReminderEnabled"
+    @Published public var isReminderEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isReminderEnabled, forKey: Self.reminderEnabledKey)
+            Task {
+                if isReminderEnabled {
+                    let granted = await notificationService.requestAuthorization()
+                    if granted {
+                        await notificationService.scheduleWeekdayReminders()
+                    } else {
+                        self.isReminderEnabled = false
+                        UserDefaults.standard.set(false, forKey: Self.reminderEnabledKey)
+                    }
+                } else {
+                    await notificationService.cancelReminders()
+                }
+                await updateNotificationStatus()
+            }
+        }
+    }
+
     private let service: CommuteServiceProtocol
     private let notificationService: CommuteNotificationServiceProtocol
     private var timer: AnyCancellable?
@@ -22,6 +43,9 @@ public final class CommuteViewModel: ObservableObject {
     ) {
         self.service = service
         self.notificationService = notificationService
+        let savedSetting = UserDefaults.standard.object(forKey: Self.reminderEnabledKey) as? Bool ?? true
+        self.isReminderEnabled = savedSetting
+
         let formatter = DateFormatter()
         formatter.timeZone = kstTimeZone
         formatter.dateFormat = "HH:mm:ss"

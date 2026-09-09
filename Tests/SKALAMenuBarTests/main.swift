@@ -329,6 +329,7 @@ final class MockCommuteNotificationService: CommuteNotificationServiceProtocol, 
     func requestAuthorization() async -> Bool { true }
     func checkAuthorizationStatus() async -> Bool { true }
     func scheduleWeekdayReminders() async {}
+    func cancelReminders() async {}
 }
 
 @MainActor

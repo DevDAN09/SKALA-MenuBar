@@ -5,6 +5,7 @@ public protocol CommuteNotificationServiceProtocol: Sendable {
     func requestAuthorization() async -> Bool
     func checkAuthorizationStatus() async -> Bool
     func scheduleWeekdayReminders() async
+    func cancelReminders() async
 }
 
 public final class CommuteNotificationService: CommuteNotificationServiceProtocol, @unchecked Sendable {
@@ -122,5 +123,17 @@ public final class CommuteNotificationService: CommuteNotificationServiceProtoco
                 print("[CommuteNotificationService] Failed to schedule notification: \(error)")
             }
         }
+    }
+
+    public func cancelReminders() async {
+        guard let center = center else {
+            return
+        }
+        var idsToRemove = [Self.morningNotificationId, Self.eveningNotificationId]
+        for weekday in [2, 3, 4, 5, 6] {
+            idsToRemove.append("\(Self.morningNotificationId).\(weekday)")
+            idsToRemove.append("\(Self.eveningNotificationId).\(weekday)")
+        }
+        center.removePendingNotificationRequests(withIdentifiers: idsToRemove)
     }
 }
