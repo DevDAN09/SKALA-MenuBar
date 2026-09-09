@@ -206,9 +206,28 @@ public struct CommuteMenuView: View {
                     }
                 }
             }
+
+            Spacer()
+
+            Divider()
+
+            HStack {
+                Text("SKALA MenuBar")
+                    .font(.caption2)
+                    .foregroundColor(.secondary)
+
+                Spacer()
+
+                Button("종료") {
+                    NSApplication.shared.terminate(nil)
+                }
+                .font(.caption2)
+                .buttonStyle(.plain)
+            }
         }
         .padding(14)
         .frame(width: 320)
+        .frame(maxHeight: .infinity)
         .animation(.easeInOut(duration: 0.2), value: viewModel.isDeveloperModeEnabled)
         .task {
             if viewModel.isDeveloperModeEnabled {

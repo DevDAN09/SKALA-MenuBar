@@ -80,7 +80,7 @@ macOS 표준 설치 프로그램(`.pkg`)을 만들어 다른 Mac에 배포하거
 ```bash
 ./scripts/build_pkg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.2.2.pkg`
+- 생성 위치: `dist/SKALA-MenuBar-1.2.3.pkg`
 - 설치 위치: `/Applications/SKALA-MenuBar.app`
 - **보안 격리 자동 해제 내장**: 패키지 설치 시 `postinstall` 스크립트가 실행되어 앱의 Gatekeeper 격리 속성(`com.apple.quarantine`)을 자동으로 제거합니다.
 
