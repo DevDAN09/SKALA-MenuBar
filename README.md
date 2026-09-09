@@ -9,7 +9,7 @@ SK AX 판교캠퍼스 인근(**SK플래닛·판교디지털센터**, **이노밸
 ### ⚡ 가장 추천: 터미널 1초 원클릭 자동 설치 (보안 경고 없음)
 Gatekeeper 경고 없이 가장 간편하게 설치하고 실행하는 방법입니다. 터미널에서 아래 명령어를 복사하여 실행하세요:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/dev/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/main/scripts/install.sh | bash
 ```
 > **자동 처리 항목**: 최신 패키지 다운로드 ➡️ macOS 보안 격리 속성(`quarantine`) 자동 해제 ➡️ 기존 구버전 프로세스 종료 ➡️ `/Applications` 설치 ➡️ 앱 즉시 실행
 
@@ -30,8 +30,13 @@ curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/dev/scripts/
   - `🚌 9007: 12분 (8전)` (일반 도착 예정)
   - `🚨 602-1B: 2분 전 (1전)` (3분 이내 곧 도착)
   - `🚌 602-1A: 정보 없음` (차고지 대기 또는 운행 종료)
-- **자세히보기 상단 2개 탭 스위처**:
-  - `[🚌 버스]` `[🍱 식당]` 원클릭 직관적 화면 전환
+- **자세히보기 상단 3개 탭 스위처**:
+  - `[🚌 버스]` `[🍱 식당]` `[🏢 출퇴근]` 직관적 화면 전환
+- **🏢 출퇴근 & 공간 예약 관리**:
+  - **한국 표준시(KST) 실시간 시계**
+  - **Tabling Spaces 공간 예약 바로가기**
+  - **평일 출퇴근 알림**: 평일 08:50(입실 확인) 및 17:50(퇴실 확인) 로컬 시스템 알림 ON/OFF 스위치 토글
+  - **개발자 모드 이스터에그**: 출퇴근 탭 버튼 5회 연속 클릭 시 출퇴근 모바일 웹뷰(사내망 Wi-Fi 감지, 17:50 퇴실 게이팅, 입실/퇴실 윈도우) 활성화
 - **🍱 이노밸리 구내식당 식단표 분석**:
   - 카카오톡 채널(`pf.kakao.com/_LCxlxlxb`)의 최신 주간 식단표 이미지를 자동 수집
   - macOS 내장 **Apple Vision OCR (3x 초고화질 업스케일링 & 명암 전처리 & 특화 사전)**을 통해 한식/양식/면/샐러드바 등 전 코너 100% 정합성 자동 분류
@@ -75,7 +80,7 @@ macOS 표준 설치 프로그램(`.pkg`)을 만들어 다른 Mac에 배포하거
 ```bash
 ./scripts/build_pkg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.1.3.pkg`
+- 생성 위치: `dist/SKALA-MenuBar-1.2.2.pkg`
 - 설치 위치: `/Applications/SKALA-MenuBar.app`
 - **보안 격리 자동 해제 내장**: 패키지 설치 시 `postinstall` 스크립트가 실행되어 앱의 Gatekeeper 격리 속성(`com.apple.quarantine`)을 자동으로 제거합니다.
 
