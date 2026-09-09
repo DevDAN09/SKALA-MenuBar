@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import AppKit
 
 @MainActor
 public final class CommuteViewModel: ObservableObject {
@@ -146,6 +147,16 @@ public final class CommuteViewModel: ObservableObject {
             await notificationService.scheduleWeekdayReminders()
         }
         await updateNotificationStatus()
+    }
+
+    public func openSystemNotificationSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.Notifications-Settings.extension"),
+           NSWorkspace.shared.open(url) {
+            return
+        }
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+            NSWorkspace.shared.open(url)
+        }
     }
 
     deinit {
