@@ -8,6 +8,7 @@ public final class CommuteViewModel: ObservableObject {
     @Published public private(set) var currentTimeString: String = ""
     @Published public private(set) var countdownString: String? = nil
     @Published public private(set) var isCheckingNetwork: Bool = false
+    @Published public private(set) var isNotificationAuthorized: Bool = false
 
     private let service: CommuteServiceProtocol
     private let notificationService: CommuteNotificationServiceProtocol
@@ -66,6 +67,19 @@ public final class CommuteViewModel: ObservableObject {
         isInternalNetwork = await service.checkInternalNetwork()
         isCheckingNetwork = false
         updateClock()
+        await updateNotificationStatus()
+    }
+
+    public func updateNotificationStatus() async {
+        isNotificationAuthorized = await notificationService.checkAuthorizationStatus()
+    }
+
+    public func requestNotificationPermission() async {
+        let granted = await notificationService.requestAuthorization()
+        if granted {
+            await notificationService.scheduleWeekdayReminders()
+        }
+        await updateNotificationStatus()
     }
 
     public func triggerCheckIn() {

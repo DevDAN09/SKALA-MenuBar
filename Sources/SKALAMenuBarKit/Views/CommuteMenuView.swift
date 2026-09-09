@@ -123,13 +123,39 @@ public struct CommuteMenuView: View {
             }
 
             // 4. Notification Footer Info
-            HStack(spacing: 4) {
-                Image(systemName: "bell.fill")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                Text("평일 08:50 출석 / 17:50 퇴근 알림")
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+            HStack(spacing: 6) {
+                if viewModel.isNotificationAuthorized {
+                    Image(systemName: "bell.badge.fill")
+                        .font(.caption2)
+                        .foregroundColor(.green)
+                    Text("평일 08:50 / 17:50 알림 활성화됨")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                } else {
+                    Image(systemName: "bell.slash")
+                        .font(.caption2)
+                        .foregroundColor(.orange)
+                    Text("평일 알림 미등록")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+
+                    Spacer()
+
+                    Button {
+                        Task {
+                            await viewModel.requestNotificationPermission()
+                        }
+                    } label: {
+                        Text("알림 켜기")
+                            .font(.system(size: 10, weight: .semibold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Color.accentColor.opacity(0.15))
+                            .foregroundColor(.accentColor)
+                            .cornerRadius(4)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
             .padding(.top, 2)
         }

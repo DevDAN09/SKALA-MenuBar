@@ -3,6 +3,7 @@ import UserNotifications
 
 public protocol CommuteNotificationServiceProtocol: Sendable {
     func requestAuthorization() async -> Bool
+    func checkAuthorizationStatus() async -> Bool
     func scheduleWeekdayReminders() async
 }
 
@@ -31,10 +32,22 @@ public final class CommuteNotificationService: CommuteNotificationServiceProtoco
             return false
         }
         do {
-            return try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            if granted {
+                await scheduleWeekdayReminders()
+            }
+            return granted
         } catch {
             return false
         }
+    }
+
+    public func checkAuthorizationStatus() async -> Bool {
+        guard let center = center else {
+            return false
+        }
+        let settings = await center.notificationSettings()
+        return settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional
     }
 
     public func makeMorningNotificationRequest(for weekday: Int) -> UNNotificationRequest {

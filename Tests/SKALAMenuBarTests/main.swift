@@ -327,6 +327,7 @@ final class MockCommuteService: CommuteServiceProtocol, @unchecked Sendable {
 
 final class MockCommuteNotificationService: CommuteNotificationServiceProtocol, @unchecked Sendable {
     func requestAuthorization() async -> Bool { true }
+    func checkAuthorizationStatus() async -> Bool { true }
     func scheduleWeekdayReminders() async {}
 }
 
