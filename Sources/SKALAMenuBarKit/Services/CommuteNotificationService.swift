@@ -103,7 +103,11 @@ public final class CommuteNotificationService: CommuteNotificationServiceProtoco
 
         let requests = buildNotificationRequests()
         for req in requests {
-            try? await center.add(req)
+            do {
+                try await center.add(req)
+            } catch {
+                print("[CommuteNotificationService] Failed to schedule notification: \(error)")
+            }
         }
     }
 }

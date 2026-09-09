@@ -38,13 +38,14 @@ public struct MainContainerView: View {
                         selectedTab = tab
                     } label: {
                         HStack(spacing: 6) {
-                            if tab == .bus {
+                            switch tab {
+                            case .bus:
                                 Image(systemName: "bus.fill")
                                     .font(.system(size: 13))
-                            } else if tab == .cafeteria {
+                            case .cafeteria:
                                 Text("🍱")
                                     .font(.system(size: 13))
-                            } else {
+                            case .commute:
                                 Image(systemName: "clock.badge.checkmark")
                                     .font(.system(size: 13))
                             }

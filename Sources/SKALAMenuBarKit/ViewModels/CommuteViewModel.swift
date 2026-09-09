@@ -13,6 +13,7 @@ public final class CommuteViewModel: ObservableObject {
     private let notificationService: CommuteNotificationServiceProtocol
     private var timer: AnyCancellable?
     private let kstTimeZone = TimeZone(identifier: "Asia/Seoul") ?? TimeZone(secondsFromGMT: 9 * 3600)!
+    private let timeFormatter: DateFormatter
 
     public init(
         service: CommuteServiceProtocol = CommuteService.shared,
@@ -20,6 +21,10 @@ public final class CommuteViewModel: ObservableObject {
     ) {
         self.service = service
         self.notificationService = notificationService
+        let formatter = DateFormatter()
+        formatter.timeZone = kstTimeZone
+        formatter.dateFormat = "HH:mm:ss"
+        self.timeFormatter = formatter
         updateClock()
         startTimer()
     }
@@ -38,10 +43,7 @@ public final class CommuteViewModel: ObservableObject {
     }
 
     public func updateClock(at date: Date = Date()) {
-        let formatter = DateFormatter()
-        formatter.timeZone = kstTimeZone
-        formatter.dateFormat = "HH:mm:ss"
-        currentTimeString = formatter.string(from: date)
+        currentTimeString = timeFormatter.string(from: date)
 
         isCheckOutAllowed = service.isCheckOutAllowed(at: date)
 
@@ -59,6 +61,7 @@ public final class CommuteViewModel: ObservableObject {
     }
 
     public func refresh() async {
+        guard !isCheckingNetwork else { return }
         isCheckingNetwork = true
         isInternalNetwork = await service.checkInternalNetwork()
         isCheckingNetwork = false
