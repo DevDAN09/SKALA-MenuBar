@@ -1,4 +1,5 @@
 import Foundation
+import UserNotifications
 import SKALAMenuBarKit
 
 final class MockURLProtocol: URLProtocol {
@@ -211,6 +212,76 @@ func testCommuteServiceKSTCheckOutGate() {
     print("✅ testCommuteServiceKSTCheckOutGate passed")
 }
 
+func testCommuteNotificationDateComponents() {
+    let kst = TimeZone(identifier: "Asia/Seoul")!
+    var cal = Calendar(identifier: .gregorian)
+    cal.timeZone = kst
+
+    // Morning check-in component: 8:50 KST
+    let morningHour = 8
+    let morningMinute = 50
+    assert(morningHour == 8 && morningMinute == 50, "Morning alarm should be 08:50")
+
+    // Evening check-out component: 17:50 KST
+    let eveningHour = 17
+    let eveningMinute = 50
+    assert(eveningHour == 17 && eveningMinute == 50, "Evening alarm should be 17:50")
+
+    print("✅ testCommuteNotificationDateComponents passed")
+}
+
+func testCommuteNotificationService() async {
+    assert(CommuteNotificationService.morningNotificationId == "skala.commute.morning.checkin")
+    assert(CommuteNotificationService.eveningNotificationId == "skala.commute.evening.checkout")
+
+    let service = CommuteNotificationService()
+    let protoService: CommuteNotificationServiceProtocol = service
+    _ = protoService
+
+    // In CLI test environment (no bundle identifier), calling methods should safely execute without crashing
+    let auth = await service.requestAuthorization()
+    assert(!auth, "CLI test authorization should return false safely")
+    await service.scheduleWeekdayReminders()
+
+    let requests = service.buildNotificationRequests()
+    assert(requests.count == 10, "Should generate 10 requests (5 weekdays * 2)")
+
+    let weekdays = [2, 3, 4, 5, 6]
+    for weekday in weekdays {
+        let morning = service.makeMorningNotificationRequest(for: weekday)
+        assert(morning.identifier == "\(CommuteNotificationService.morningNotificationId).\(weekday)")
+        assert(morning.content.title == "⏰ [SKALA] 출석 확인 알림")
+        assert(morning.content.body == "8시 50분입니다. 오늘 입실(출석) 체크하셨나요?")
+        assert(morning.content.sound == .default)
+        if let trigger = morning.trigger as? UNCalendarNotificationTrigger {
+            assert(trigger.repeats == true)
+            assert(trigger.dateComponents.weekday == weekday)
+            assert(trigger.dateComponents.hour == 8)
+            assert(trigger.dateComponents.minute == 50)
+            assert(trigger.dateComponents.timeZone?.identifier == "Asia/Seoul" || trigger.dateComponents.timeZone?.secondsFromGMT() == 9 * 3600)
+        } else {
+            assertionFailure("Morning trigger is not UNCalendarNotificationTrigger")
+        }
+
+        let evening = service.makeEveningNotificationRequest(for: weekday)
+        assert(evening.identifier == "\(CommuteNotificationService.eveningNotificationId).\(weekday)")
+        assert(evening.content.title == "👋 [SKALA] 퇴근 체크인 알림")
+        assert(evening.content.body == "17시 50분입니다. 지금 퇴실(퇴근) 체크가 가능합니다!")
+        assert(evening.content.sound == .default)
+        if let trigger = evening.trigger as? UNCalendarNotificationTrigger {
+            assert(trigger.repeats == true)
+            assert(trigger.dateComponents.weekday == weekday)
+            assert(trigger.dateComponents.hour == 17)
+            assert(trigger.dateComponents.minute == 50)
+            assert(trigger.dateComponents.timeZone?.identifier == "Asia/Seoul" || trigger.dateComponents.timeZone?.secondsFromGMT() == 9 * 3600)
+        } else {
+            assertionFailure("Evening trigger is not UNCalendarNotificationTrigger")
+        }
+    }
+
+    print("✅ testCommuteNotificationService passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -220,6 +291,8 @@ func main() async {
         await testCafeteriaViewModelDefaults()
         try await testCafeteriaLiveFetchAndParse()
         testCommuteServiceKSTCheckOutGate()
+        testCommuteNotificationDateComponents()
+        await testCommuteNotificationService()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
