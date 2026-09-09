@@ -326,8 +326,9 @@ final class MockCommuteService: CommuteServiceProtocol, @unchecked Sendable {
 }
 
 final class MockCommuteNotificationService: CommuteNotificationServiceProtocol, @unchecked Sendable {
+    var authStatus: Bool = true
     func requestAuthorization() async -> Bool { true }
-    func checkAuthorizationStatus() async -> Bool { true }
+    func checkAuthorizationStatus() async -> Bool { authStatus }
     func scheduleWeekdayReminders() async {}
     func cancelReminders() async {}
 }
@@ -430,7 +431,7 @@ func testCommuteViewModelLogic() async {
 }
 
 @MainActor
-func testCommuteMenuView() {
+func testCommuteMenuView() async {
     let mockService = MockCommuteService()
     let mockNotifService = MockCommuteNotificationService()
     let vm = CommuteViewModel(service: mockService, notificationService: mockNotifService)
@@ -454,6 +455,17 @@ func testCommuteMenuView() {
     vm.isDeveloperModeEnabled = true
     let viewDevMode = CommuteMenuView(viewModel: vm)
     _ = viewDevMode.body
+
+    // Check with notification unauthorized banner visible simultaneously with dev mode
+    mockNotifService.authStatus = false
+    await vm.updateNotificationStatus()
+    assert(!vm.isNotificationAuthorized, "isNotificationAuthorized should be false")
+
+    let viewUnauthorizedAndDev = CommuteMenuView(viewModel: vm)
+    _ = viewUnauthorizedAndDev.body
+
+    // Also verify openSystemNotificationSettings does not throw/crash
+    vm.openSystemNotificationSettings()
 
     print("✅ testCommuteMenuView passed")
 }
