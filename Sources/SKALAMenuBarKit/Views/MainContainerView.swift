@@ -1,12 +1,13 @@
 import SwiftUI
 
 public enum MainMenuTab: CaseIterable {
-    case bus, cafeteria
+    case bus, cafeteria, commute
 
-    var title: String {
+    public var title: String {
         switch self {
         case .bus: return "버스"
         case .cafeteria: return "식당"
+        case .commute: return "출퇴근"
         }
     }
 }
@@ -15,14 +16,17 @@ public enum MainMenuTab: CaseIterable {
 public struct MainContainerView: View {
     @ObservedObject var busViewModel: BusViewModel
     @ObservedObject var cafeteriaViewModel: CafeteriaViewModel
+    @ObservedObject var commuteViewModel: CommuteViewModel
     @State private var selectedTab: MainMenuTab = .bus
 
     public init(
         busViewModel: BusViewModel,
-        cafeteriaViewModel: CafeteriaViewModel
+        cafeteriaViewModel: CafeteriaViewModel,
+        commuteViewModel: CommuteViewModel
     ) {
         self.busViewModel = busViewModel
         self.cafeteriaViewModel = cafeteriaViewModel
+        self.commuteViewModel = commuteViewModel
     }
 
     public var body: some View {
@@ -32,13 +36,20 @@ public struct MainContainerView: View {
                     let isSelected = selectedTab == tab
                     Button {
                         selectedTab = tab
+                        if tab == .commute {
+                            commuteViewModel.registerDeveloperModeClick()
+                        }
                     } label: {
                         HStack(spacing: 6) {
-                            if tab == .bus {
+                            switch tab {
+                            case .bus:
                                 Image(systemName: "bus.fill")
                                     .font(.system(size: 13))
-                            } else {
+                            case .cafeteria:
                                 Text("🍱")
+                                    .font(.system(size: 13))
+                            case .commute:
+                                Image(systemName: "clock.badge.checkmark")
                                     .font(.system(size: 13))
                             }
                             Text(tab.title)
@@ -65,13 +76,17 @@ public struct MainContainerView: View {
             case .cafeteria:
                 CafeteriaMenuView(viewModel: cafeteriaViewModel)
                     .frame(width: 320)
+            case .commute:
+                CommuteMenuView(viewModel: commuteViewModel)
+                    .frame(width: 320)
             }
         }
         .frame(width: 320)
         .task {
             async let busTask: () = busViewModel.refresh()
             async let cafeTask: () = cafeteriaViewModel.refresh()
-            _ = await (busTask, cafeTask)
+            async let commuteTask: () = commuteViewModel.refresh()
+            _ = await (busTask, cafeTask, commuteTask)
         }
     }
 }

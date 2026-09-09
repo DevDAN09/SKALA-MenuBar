@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 APP_NAME="SKALA-MenuBar"
-VERSION="1.1.3"
+VERSION="1.2.2"
 BUNDLE_ID="com.skala.menubar"
 DIST_DIR="$PROJECT_ROOT/dist"
 ROOT_DIR="$DIST_DIR/root"
@@ -56,7 +56,7 @@ cat << PLIST > "$APP_BUNDLE/Contents/Info.plist"
     <key>CFBundleShortVersionString</key>
     <string>$VERSION</string>
     <key>CFBundleVersion</key>
-    <string>4</string>
+    <string>7</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
     <key>LSUIElement</key>
@@ -71,6 +71,10 @@ PLIST
 export COPYFILE_DISABLE=1
 find "$ROOT_DIR" -name '._*' -delete 2>/dev/null || true
 xattr -cr "$ROOT_DIR" 2>/dev/null || true
+
+# macOS 시스템 알림 및 권한 등록을 위한 ad-hoc 코드 서명
+echo "✍️  앱 번들 코드 서명 중 (ad-hoc)..."
+codesign --force --deep --sign - "$APP_BUNDLE" 2>/dev/null || true
 
 echo "📦 3. pkgbuild로 정식 macOS 설치 패키지 생성 중 (격리 해제 스크립트 포함)..."
 pkgbuild --root "$ROOT_DIR" \
