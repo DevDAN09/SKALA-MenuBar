@@ -36,6 +36,9 @@ public struct MainContainerView: View {
                     let isSelected = selectedTab == tab
                     Button {
                         selectedTab = tab
+                        if tab == .commute {
+                            commuteViewModel.registerDeveloperModeClick()
+                        }
                     } label: {
                         HStack(spacing: 6) {
                             switch tab {

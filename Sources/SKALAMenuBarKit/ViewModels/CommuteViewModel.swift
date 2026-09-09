@@ -31,6 +31,16 @@ public final class CommuteViewModel: ObservableObject {
         }
     }
 
+    private static let developerModeKey = "isCommuteDeveloperModeEnabled"
+    @Published public var isDeveloperModeEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(isDeveloperModeEnabled, forKey: Self.developerModeKey)
+        }
+    }
+
+    private var devModeClickCount = 0
+    private var lastDevModeClickTime: Date = .distantPast
+
     private let service: CommuteServiceProtocol
     private let notificationService: CommuteNotificationServiceProtocol
     private var timer: AnyCancellable?
@@ -45,6 +55,9 @@ public final class CommuteViewModel: ObservableObject {
         self.notificationService = notificationService
         let savedSetting = UserDefaults.standard.object(forKey: Self.reminderEnabledKey) as? Bool ?? true
         self.isReminderEnabled = savedSetting
+
+        let savedDevMode = UserDefaults.standard.bool(forKey: Self.developerModeKey)
+        self.isDeveloperModeEnabled = savedDevMode
 
         let formatter = DateFormatter()
         formatter.timeZone = kstTimeZone
@@ -98,12 +111,24 @@ public final class CommuteViewModel: ObservableObject {
         isNotificationAuthorized = await notificationService.checkAuthorizationStatus()
     }
 
-    public func requestNotificationPermission() async {
-        let granted = await notificationService.requestAuthorization()
-        if granted {
-            await notificationService.scheduleWeekdayReminders()
+    public func registerDeveloperModeClick() {
+        let now = Date()
+        if now.timeIntervalSince(lastDevModeClickTime) > 2.5 {
+            devModeClickCount = 1
+        } else {
+            devModeClickCount += 1
         }
-        await updateNotificationStatus()
+        lastDevModeClickTime = now
+
+        if devModeClickCount >= 5 {
+            devModeClickCount = 0
+            isDeveloperModeEnabled.toggle()
+            if isDeveloperModeEnabled {
+                Task {
+                    await refresh()
+                }
+            }
+        }
     }
 
     public func triggerCheckIn() {
@@ -113,6 +138,14 @@ public final class CommuteViewModel: ObservableObject {
     public func triggerCheckOut() {
         guard isCheckOutAllowed else { return }
         CommuteWebWindowController.shared.show(url: service.targetURL)
+    }
+
+    public func requestNotificationPermission() async {
+        let granted = await notificationService.requestAuthorization()
+        if granted {
+            await notificationService.scheduleWeekdayReminders()
+        }
+        await updateNotificationStatus()
     }
 
     deinit {

@@ -388,17 +388,43 @@ func testCommuteViewModelLogic() async {
     assert(vm.isCheckingNetwork == false, "isCheckingNetwork should be false after refresh")
     assert(mockService.networkCheckCallCount == 2, "checkInternalNetwork should have been called twice")
 
+    // Test reminderEnabled toggle
+    vm.isReminderEnabled = false
+    assert(vm.isReminderEnabled == false, "isReminderEnabled should be false after toggle")
+    vm.isReminderEnabled = true
+    assert(vm.isReminderEnabled == true, "isReminderEnabled should be true after toggle")
+
+    // Test developer mode 5-click easter egg
+    vm.isDeveloperModeEnabled = false
+    assert(vm.isDeveloperModeEnabled == false, "Developer mode should initially be disabled")
+
+    // 4 clicks should NOT activate developer mode
+    for _ in 1...4 {
+        vm.registerDeveloperModeClick()
+    }
+    assert(vm.isDeveloperModeEnabled == false, "Developer mode should NOT be active after 4 clicks")
+
+    // 5th click activates developer mode
+    vm.registerDeveloperModeClick()
+    assert(vm.isDeveloperModeEnabled == true, "Developer mode SHOULD be active after 5 clicks")
+
     // Test triggerCheckIn and triggerCheckOut handlers
     vm.triggerCheckIn()
     assert(CommuteWebWindowController.shared.window != nil, "Web window should exist after triggerCheckIn")
 
-    // triggerCheckOut when not allowed: window does not crash
+    // triggerCheckOut when not allowed: does not crash
     vm.triggerCheckOut()
 
     // triggerCheckOut when allowed
     mockService.checkOutAllowed = true
     vm.updateClock()
     vm.triggerCheckOut()
+
+    // 5 more clicks should toggle developer mode back to false
+    for _ in 1...5 {
+        vm.registerDeveloperModeClick()
+    }
+    assert(vm.isDeveloperModeEnabled == false, "Developer mode SHOULD be disabled after 5 more clicks")
 
     print("✅ testCommuteViewModelLogic passed")
 }
@@ -423,6 +449,11 @@ func testCommuteMenuView() {
     vm.updateClock()
     let viewAfter = CommuteMenuView(viewModel: vm)
     _ = viewAfter.body
+
+    // Check with developer mode enabled
+    vm.isDeveloperModeEnabled = true
+    let viewDevMode = CommuteMenuView(viewModel: vm)
+    _ = viewDevMode.body
 
     print("✅ testCommuteMenuView passed")
 }
