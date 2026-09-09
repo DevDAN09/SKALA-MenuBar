@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import UserNotifications
 import SKALAMenuBarKit
 
@@ -400,6 +401,30 @@ func testCommuteViewModelLogic() async {
     print("✅ testCommuteViewModelLogic passed")
 }
 
+@MainActor
+func testCommuteMenuView() {
+    let mockService = MockCommuteService()
+    let mockNotifService = MockCommuteNotificationService()
+    let vm = CommuteViewModel(service: mockService, notificationService: mockNotifService)
+    defer { vm.stopTimer() }
+
+    // Check with checkout not allowed
+    mockService.checkOutAllowed = false
+    mockService.diffToReturn = (1, 15, 30)
+    vm.updateClock()
+    let viewBefore = CommuteMenuView(viewModel: vm)
+    _ = viewBefore.body
+
+    // Check with checkout allowed
+    mockService.checkOutAllowed = true
+    mockService.diffToReturn = nil
+    vm.updateClock()
+    let viewAfter = CommuteMenuView(viewModel: vm)
+    _ = viewAfter.body
+
+    print("✅ testCommuteMenuView passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -414,6 +439,7 @@ func main() async {
         await testCommuteWebWindowController()
         await testCommuteViewModelInitialState()
         await testCommuteViewModelLogic()
+        await testCommuteMenuView()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
