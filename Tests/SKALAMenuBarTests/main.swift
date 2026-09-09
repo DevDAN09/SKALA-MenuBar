@@ -302,6 +302,104 @@ func testCommuteWebWindowController() {
     print("✅ testCommuteWebWindowController passed")
 }
 
+final class MockCommuteService: CommuteServiceProtocol, @unchecked Sendable {
+    var targetSSID: String = "skaxedu"
+    var targetURL: URL = URL(string: "https://att.skala-ai.com/att-checkin")!
+    var checkOutAllowed: Bool = false
+    var diffToReturn: (hours: Int, minutes: Int, seconds: Int)? = nil
+    var networkCheckResult: Bool = true
+    var networkCheckCallCount: Int = 0
+
+    func isCheckOutAllowed(at date: Date) -> Bool {
+        return checkOutAllowed
+    }
+
+    func timeUntilCheckOut(at date: Date) -> (hours: Int, minutes: Int, seconds: Int)? {
+        return diffToReturn
+    }
+
+    func checkInternalNetwork() async -> Bool {
+        networkCheckCallCount += 1
+        return networkCheckResult
+    }
+}
+
+final class MockCommuteNotificationService: CommuteNotificationServiceProtocol, @unchecked Sendable {
+    func requestAuthorization() async -> Bool { true }
+    func scheduleWeekdayReminders() async {}
+}
+
+@MainActor
+func testCommuteViewModelInitialState() {
+    let vm = CommuteViewModel()
+    assert(!vm.currentTimeString.isEmpty, "Current time string should be populated")
+    assert(vm.currentTimeString.count == 8, "Current time string format should be HH:mm:ss")
+    vm.stopTimer()
+    print("✅ testCommuteViewModelInitialState passed")
+}
+
+@MainActor
+func testCommuteViewModelLogic() async {
+    let mockService = MockCommuteService()
+    let mockNotifService = MockCommuteNotificationService()
+    let vm = CommuteViewModel(service: mockService, notificationService: mockNotifService)
+    defer { vm.stopTimer() }
+
+    // Test countdown with hours
+    mockService.diffToReturn = (2, 30, 15)
+    vm.updateClock()
+    assert(vm.countdownString == "2시간 30분 남음", "Countdown string with hours mismatch: \(String(describing: vm.countdownString))")
+
+    // Test countdown with minutes
+    mockService.diffToReturn = (0, 8, 45)
+    vm.updateClock()
+    assert(vm.countdownString == "8분 45초 남음", "Countdown string with minutes mismatch: \(String(describing: vm.countdownString))")
+
+    // Test countdown with seconds only
+    mockService.diffToReturn = (0, 0, 19)
+    vm.updateClock()
+    assert(vm.countdownString == "19초 남음", "Countdown string with seconds only mismatch: \(String(describing: vm.countdownString))")
+
+    // Test countdown when diff is nil (after 17:50 or allowed)
+    mockService.diffToReturn = nil
+    mockService.checkOutAllowed = true
+    vm.updateClock()
+    assert(vm.countdownString == nil, "Countdown should be nil when check-out is allowed")
+    assert(vm.isCheckOutAllowed == true, "isCheckOutAllowed should be true")
+
+    // Test gating: when false
+    mockService.checkOutAllowed = false
+    vm.updateClock()
+    assert(vm.isCheckOutAllowed == false, "isCheckOutAllowed should be false")
+
+    // Test refresh internal network
+    mockService.networkCheckResult = true
+    await vm.refresh()
+    assert(vm.isInternalNetwork == true, "isInternalNetwork should be true")
+    assert(vm.isCheckingNetwork == false, "isCheckingNetwork should be false after refresh")
+    assert(mockService.networkCheckCallCount == 1, "checkInternalNetwork should have been called once")
+
+    mockService.networkCheckResult = false
+    await vm.refresh()
+    assert(vm.isInternalNetwork == false, "isInternalNetwork should be false")
+    assert(vm.isCheckingNetwork == false, "isCheckingNetwork should be false after refresh")
+    assert(mockService.networkCheckCallCount == 2, "checkInternalNetwork should have been called twice")
+
+    // Test triggerCheckIn and triggerCheckOut handlers
+    vm.triggerCheckIn()
+    assert(CommuteWebWindowController.shared.window != nil, "Web window should exist after triggerCheckIn")
+
+    // triggerCheckOut when not allowed: window does not crash
+    vm.triggerCheckOut()
+
+    // triggerCheckOut when allowed
+    mockService.checkOutAllowed = true
+    vm.updateClock()
+    vm.triggerCheckOut()
+
+    print("✅ testCommuteViewModelLogic passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -314,6 +412,8 @@ func main() async {
         testCommuteNotificationDateComponents()
         await testCommuteNotificationService()
         await testCommuteWebWindowController()
+        await testCommuteViewModelInitialState()
+        await testCommuteViewModelLogic()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
@@ -322,3 +422,5 @@ func main() async {
 }
 
 await main()
+
+
