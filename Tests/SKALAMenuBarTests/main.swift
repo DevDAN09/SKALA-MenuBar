@@ -282,6 +282,26 @@ func testCommuteNotificationService() async {
     print("✅ testCommuteNotificationService passed")
 }
 
+@MainActor
+func testCommuteWebWindowController() {
+    assert(CommuteWebWindowController.iPhoneUserAgent == "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1", "iPhoneUserAgent mismatch")
+
+    let controller = CommuteWebWindowController()
+    guard let window = controller.window else {
+        assertionFailure("Window should not be nil")
+        return
+    }
+    assert(window.contentView?.bounds.width == 390, "Content width should be 390")
+    assert(window.contentView?.bounds.height == 700, "Content height should be 700")
+    assert(window.title == "SKALA 출퇴근", "Window title mismatch")
+    assert(window.level == .floating, "Window level should be floating")
+    assert(controller.webView.customUserAgent == CommuteWebWindowController.iPhoneUserAgent, "Custom User-Agent mismatch")
+    assert(controller.webView.configuration.websiteDataStore == .default(), "WebsiteDataStore must be default persistent")
+    assert(controller.webView.navigationDelegate === controller, "Navigation delegate mismatch")
+
+    print("✅ testCommuteWebWindowController passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -293,6 +313,7 @@ func main() async {
         testCommuteServiceKSTCheckOutGate()
         testCommuteNotificationDateComponents()
         await testCommuteNotificationService()
+        await testCommuteWebWindowController()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")
