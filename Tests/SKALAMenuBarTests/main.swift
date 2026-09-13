@@ -145,6 +145,57 @@ func testCafeteriaViewModelDefaults() {
     print("✅ testCafeteriaViewModelDefaults passed")
 }
 
+func testCampusCafeteriaMenuModels() {
+    assert(CafeteriaPlace.allCases == [.campus, .innovalley], "CafeteriaPlace cases mismatch")
+    assert(CafeteriaPlace.campus.displayName == "캠퍼스 식당", "Campus displayName mismatch")
+    assert(CafeteriaPlace.innovalley.displayName == "이노밸리 식당", "Innovalley displayName mismatch")
+
+    assert(MealType.lunch.operatingHours(for: .campus) == "11:30 - 13:30", "Campus lunch hours mismatch")
+    assert(MealType.dinner.operatingHours(for: .campus) == "17:30 - 19:00", "Campus dinner hours mismatch")
+
+    let mockDishes = [
+        CampusDish(name: "오돈불고기", isMain: true),
+        CampusDish(name: "순두부백탕", isMain: true),
+        CampusDish(name: "쌀밥", isMain: false)
+    ]
+    let mockMeal = CampusMeal(dishes: mockDishes, origin: "돈육:국내산")
+    let mockDay = CampusDayMenu(
+        date: "2026-09-14",
+        weekday: "월",
+        lunch: mockMeal,
+        dinner: nil,
+        dessert: "메밀차"
+    )
+    let mockWeekly = CampusWeeklyMenu(
+        weekStart: "2026-09-14",
+        weekEnd: "2026-09-18",
+        days: [mockDay]
+    )
+
+    assert(mockWeekly.menu(for: "월")?.meal(for: .lunch)?.dishes.count == 3, "Campus dishes count mismatch")
+    assert(mockWeekly.menu(for: "월")?.meal(for: .lunch)?.dishes.filter { $0.isMain }.count == 2, "Campus main dishes count mismatch")
+    assert(mockWeekly.menu(for: "월")?.dessert == "메밀차", "Campus dessert mismatch")
+    print("✅ testCampusCafeteriaMenuModels passed")
+}
+
+func testCampusCafeteriaLiveFetch() async throws {
+    let service = CafeteriaAPIService()
+    let menu = try await service.fetchCampusWeeklyMenu(forceRefresh: true)
+    assert(!menu.days.isEmpty, "Campus days should not be empty")
+    assert(menu.days.count >= 5, "Campus menu should have at least 5 days")
+
+    for day in ["월", "화", "수", "목", "금"] {
+        if let d = menu.menu(for: day) {
+            let lunchDishes = d.lunch?.dishes ?? []
+            print("🏢 [캠퍼스 \(day)요일] 점심 메뉴 수: \(lunchDishes.count), 디저트: \(d.dessert ?? "없음")")
+            let mains = lunchDishes.filter { $0.isMain }
+            assert(!lunchDishes.isEmpty, "\(day) campus lunch should have items")
+            assert(!mains.isEmpty, "\(day) campus lunch should have main dishes")
+        }
+    }
+    print("✅ testCampusCafeteriaLiveFetch passed")
+}
+
 func testCafeteriaLiveFetchAndParse() async throws {
     let service = CafeteriaAPIService()
     let menu = try await service.fetchWeeklyMenu(forceRefresh: true)
@@ -153,7 +204,7 @@ func testCafeteriaLiveFetchAndParse() async throws {
 
     for day in ["월", "화", "수", "목", "금"] {
         if let d = menu.menu(for: day) {
-            print("🍱 [\(day)요일] 점심 코너 수: \(d.lunch.count)")
+            print("🍱 [이노밸리 \(day)요일] 점심 코너 수: \(d.lunch.count)")
             for cat in d.lunch {
                 print("   [\(cat.cornerName)] \(cat.items.joined(separator: ", "))")
             }
@@ -162,6 +213,32 @@ func testCafeteriaLiveFetchAndParse() async throws {
     }
 
     print("✅ testCafeteriaLiveFetchAndParse passed")
+}
+
+@MainActor
+func testCafeteriaViewModelDualSupport() async {
+    let vm = CafeteriaViewModel()
+    // Test place switching and persistence
+    vm.selectedPlace = .campus
+    assert(vm.selectedPlace == .campus, "selectedPlace should be campus")
+    assert(UserDefaults.standard.string(forKey: CafeteriaViewModel.selectedPlaceStorageKey) == CafeteriaPlace.campus.rawValue, "UserDefaults should record campus")
+
+    let viewCampus = CafeteriaMenuView(viewModel: vm)
+    _ = viewCampus.body
+
+    vm.selectedPlace = .innovalley
+    assert(vm.selectedPlace == .innovalley, "selectedPlace should be innovalley")
+    assert(UserDefaults.standard.string(forKey: CafeteriaViewModel.selectedPlaceStorageKey) == CafeteriaPlace.innovalley.rawValue, "UserDefaults should record innovalley")
+
+    let viewInnovalley = CafeteriaMenuView(viewModel: vm)
+    _ = viewInnovalley.body
+
+    // Test open websites
+    vm.openCampusWebsite()
+    vm.openKakaoChannel()
+    vm.openOriginalImage()
+
+    print("✅ testCafeteriaViewModelDualSupport passed")
 }
 
 func testCommuteServiceKSTCheckOutGate() {
@@ -502,13 +579,94 @@ func testMainMenuTabAndContainerView() {
     print("✅ testMainMenuTabAndContainerView passed")
 }
 
+func testVersionComparator() {
+    assert(VersionComparator.clean("v1.3.0") == "1.3.0", "Prefix v should be removed")
+    assert(VersionComparator.clean("V1.2.4") == "1.2.4", "Prefix V should be removed")
+    assert(VersionComparator.clean("  1.3.0  ") == "1.3.0", "Whitespace should be trimmed")
+
+    assert(VersionComparator.isNewer(remote: "1.3.1", current: "1.3.0"), "1.3.1 should be newer than 1.3.0")
+    assert(VersionComparator.isNewer(remote: "2.0.0", current: "1.9.9"), "2.0.0 should be newer than 1.9.9")
+    assert(!VersionComparator.isNewer(remote: "1.3.0", current: "1.3.0"), "Same version should not be newer")
+    assert(!VersionComparator.isNewer(remote: "1.2.4", current: "1.3.0"), "1.2.4 should not be newer than 1.3.0")
+    assert(VersionComparator.isNewer(remote: "v1.4.0", current: "1.3.0"), "v1.4.0 should be newer than 1.3.0")
+    print("✅ testVersionComparator passed")
+}
+
+func testUpdateModelsAndJSONParsing() throws {
+    let mockJSON = """
+    {
+      "tag_name": "v1.4.0",
+      "name": "Release v1.4.0",
+      "body": "• 신규 기능 추가\\n• 버그 수정",
+      "html_url": "https://github.com/DevDAN09/SKALA-MenuBar/releases/tag/v1.4.0",
+      "assets": [
+        {
+          "name": "SKALA-MenuBar.pkg",
+          "browser_download_url": "https://example.com/SKALA-MenuBar.pkg"
+        }
+      ]
+    }
+    """.data(using: .utf8)!
+
+    let release = try JSONDecoder().decode(GitHubReleaseResponse.self, from: mockJSON)
+    assert(release.tag_name == "v1.4.0", "tag_name mismatch")
+    assert(release.assets.first?.browser_download_url == "https://example.com/SKALA-MenuBar.pkg", "asset download URL mismatch")
+
+    let updateInfo = UpdateInfo(
+        version: VersionComparator.clean(release.tag_name),
+        title: release.name ?? "",
+        releaseNotes: release.body ?? "",
+        pkgDownloadUrl: release.assets.first!.browser_download_url,
+        releaseWebUrl: release.html_url
+    )
+    assert(updateInfo.version == "1.4.0", "updateInfo version mismatch")
+    assert(updateInfo.pkgDownloadUrl == "https://example.com/SKALA-MenuBar.pkg", "pkgDownloadUrl mismatch")
+    print("✅ testUpdateModelsAndJSONParsing passed")
+}
+
+@MainActor
+func testUpdateViewModelAndViews() {
+    let vm = UpdateViewModel()
+    assert(vm.currentVersionString.hasPrefix("v"), "currentVersionString should start with v")
+
+    let sampleUpdate = UpdateInfo(
+        version: "9.9.9",
+        title: "Release v9.9.9",
+        releaseNotes: "• 테스트 릴리즈 노트",
+        pkgDownloadUrl: "https://example.com/test.pkg",
+        releaseWebUrl: "https://example.com/release"
+    )
+
+    vm.availableUpdate = sampleUpdate
+    vm.isDismissed = false
+    assert(vm.availableUpdate?.version == "9.9.9", "availableUpdate mismatch")
+
+    let banner = UpdateBannerView(viewModel: vm)
+    _ = banner.body
+
+    vm.showUpdateModal = true
+    let modal = UpdateModalView(viewModel: vm)
+    _ = modal.body
+
+    vm.dismissBanner()
+    assert(vm.isDismissed, "isDismissed should be true after dismissBanner()")
+
+    vm.skipThisVersion()
+    assert(UserDefaults.standard.string(forKey: UpdateViewModel.skippedVersionKey) == "9.9.9", "Skipped version should be recorded")
+
+    print("✅ testUpdateViewModelAndViews passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
         testCafeteriaMenuModels()
+        testCampusCafeteriaMenuModels()
         await testCafeteriaViewModelDefaults()
+        await testCafeteriaViewModelDualSupport()
+        try await testCampusCafeteriaLiveFetch()
         try await testCafeteriaLiveFetchAndParse()
         testCommuteServiceKSTCheckOutGate()
         testCommuteNotificationDateComponents()
@@ -518,6 +676,9 @@ func main() async {
         await testCommuteViewModelLogic()
         await testCommuteMenuView()
         await testMainMenuTabAndContainerView()
+        testVersionComparator()
+        try testUpdateModelsAndJSONParsing()
+        await testUpdateViewModelAndViews()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")

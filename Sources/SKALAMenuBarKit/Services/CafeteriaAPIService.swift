@@ -6,6 +6,8 @@ public final class CafeteriaAPIService: @unchecked Sendable {
     private let session = URLSession.shared
     private let channelId = "_LCxlxlxb"
     private let cacheFileName = "cafeteria_weekly_menu_cache.json"
+    private let campusCacheFileName = "campus_weekly_menu_cache.json"
+    private let campusApiUrl = "https://skala-lunch.ewkimhyunsu11.workers.dev/api/menus/current"
 
     public init() {}
 
@@ -30,6 +32,49 @@ public final class CafeteriaAPIService: @unchecked Sendable {
     private struct OCRBox {
         let text: String
         let y: Double
+    }
+
+    public func fetchCampusWeeklyMenu(forceRefresh: Bool = false) async throws -> CampusWeeklyMenu {
+        if !forceRefresh, let cached = loadCampusFromCache() {
+            if isDateInCurrentWeek(cached.fetchedAt) {
+                return cached
+            }
+        }
+
+        guard let url = URL(string: campusApiUrl) else {
+            throw URLError(.badURL)
+        }
+
+        var request = URLRequest(url: url)
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("SKALA-MenuBar", forHTTPHeaderField: "User-Agent")
+
+        let (data, response) = try await session.data(for: request)
+        guard let httpRes = response as? HTTPURLResponse, (200...299).contains(httpRes.statusCode) else {
+            if let cached = loadCampusFromCache() {
+                return cached
+            }
+            throw URLError(.badServerResponse)
+        }
+
+        struct CampusAPIResponse: Codable {
+            let weekStart: String
+            let weekEnd: String
+            let days: [CampusDayMenu]
+            let notes: [String]?
+        }
+
+        let apiRes = try JSONDecoder().decode(CampusAPIResponse.self, from: data)
+        let weeklyMenu = CampusWeeklyMenu(
+            weekStart: apiRes.weekStart,
+            weekEnd: apiRes.weekEnd,
+            days: apiRes.days,
+            notes: apiRes.notes,
+            fetchedAt: Date()
+        )
+
+        saveCampusToCache(weeklyMenu)
+        return weeklyMenu
     }
 
     public func fetchWeeklyMenu(forceRefresh: Bool = false) async throws -> WeeklyMenu {
@@ -366,6 +411,10 @@ public final class CafeteriaAPIService: @unchecked Sendable {
         FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(cacheFileName)
     }
 
+    private var campusCacheFileURL: URL? {
+        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(campusCacheFileName)
+    }
+
     private func loadFromCache() -> WeeklyMenu? {
         guard let url = cacheFileURL, let data = try? Data(contentsOf: url) else { return nil }
         return try? JSONDecoder().decode(WeeklyMenu.self, from: data)
@@ -373,6 +422,16 @@ public final class CafeteriaAPIService: @unchecked Sendable {
 
     private func saveToCache(_ menu: WeeklyMenu) {
         guard let url = cacheFileURL, let data = try? JSONEncoder().encode(menu) else { return }
+        try? data.write(to: url)
+    }
+
+    private func loadCampusFromCache() -> CampusWeeklyMenu? {
+        guard let url = campusCacheFileURL, let data = try? Data(contentsOf: url) else { return nil }
+        return try? JSONDecoder().decode(CampusWeeklyMenu.self, from: data)
+    }
+
+    private func saveCampusToCache(_ menu: CampusWeeklyMenu) {
+        guard let url = campusCacheFileURL, let data = try? JSONEncoder().encode(menu) else { return }
         try? data.write(to: url)
     }
 
