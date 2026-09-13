@@ -119,28 +119,69 @@ public struct BusStatusMenuView: View {
 
                 Spacer()
 
-                Button("지금 갱신") {
+                Button {
                     Task {
                         await viewModel.refresh()
                     }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 10))
+                        Text("지금 갱신")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.primary)
+                    .cornerRadius(6)
                 }
+                .buttonStyle(.plain)
                 .keyboardShortcut("r", modifiers: .command)
             }
 
             // Interval selector & Quit
             HStack {
-                Picker("갱신 주기", selection: $viewModel.refreshIntervalSeconds) {
-                    Text("15초").tag(15)
-                    Text("30초").tag(30)
-                    Text("60초").tag(60)
+                Menu {
+                    Button("15초") { viewModel.refreshIntervalSeconds = 15 }
+                    Button("30초") { viewModel.refreshIntervalSeconds = 30 }
+                    Button("60초") { viewModel.refreshIntervalSeconds = 60 }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "timer")
+                            .font(.system(size: 10))
+                        Text("주기: \(viewModel.refreshIntervalSeconds)초")
+                            .font(.system(size: 11, weight: .medium))
+                        Image(systemName: "chevron.up.chevron.down")
+                            .font(.system(size: 8))
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.primary)
+                    .cornerRadius(6)
                 }
-                .pickerStyle(.menu)
+                .menuStyle(.borderlessButton)
 
                 Spacer()
 
-                Button("종료") {
+                Button {
                     NSApplication.shared.terminate(nil)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "power")
+                            .font(.system(size: 10))
+                        Text("종료")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.primary)
+                    .cornerRadius(6)
                 }
+                .buttonStyle(.plain)
                 .keyboardShortcut("q", modifiers: .command)
             }
         }

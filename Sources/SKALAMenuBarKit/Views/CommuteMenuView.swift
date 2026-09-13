@@ -246,10 +246,21 @@ public struct CommuteMenuView: View {
 
                 Spacer()
 
-                Button("종료") {
+                Button {
                     NSApplication.shared.terminate(nil)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "power")
+                            .font(.system(size: 10))
+                        Text("종료")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.primary)
+                    .cornerRadius(6)
                 }
-                .font(.caption2)
                 .buttonStyle(.plain)
             }
         }
