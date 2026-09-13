@@ -92,23 +92,31 @@ public final class CommuteWebWindowController: NSWindowController, WKNavigationD
         webView.reload()
     }
 
-    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        progressIndicator.isHidden = false
-        progressIndicator.startAnimation(nil)
+    nonisolated public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+        MainActor.assumeIsolated {
+            progressIndicator.isHidden = false
+            progressIndicator.startAnimation(nil)
+        }
     }
 
-    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        progressIndicator.stopAnimation(nil)
-        progressIndicator.isHidden = true
+    nonisolated public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        MainActor.assumeIsolated {
+            progressIndicator.stopAnimation(nil)
+            progressIndicator.isHidden = true
+        }
     }
 
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        progressIndicator.stopAnimation(nil)
-        progressIndicator.isHidden = true
+    nonisolated public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        MainActor.assumeIsolated {
+            progressIndicator.stopAnimation(nil)
+            progressIndicator.isHidden = true
+        }
     }
 
-    public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        progressIndicator.stopAnimation(nil)
-        progressIndicator.isHidden = true
+    nonisolated public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        MainActor.assumeIsolated {
+            progressIndicator.stopAnimation(nil)
+            progressIndicator.isHidden = true
+        }
     }
 }
