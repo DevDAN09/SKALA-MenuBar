@@ -176,32 +176,80 @@ public struct CafeteriaMenuView: View {
             Divider()
 
             // Action Buttons & Footer
-            HStack {
+            HStack(spacing: 6) {
                 if viewModel.selectedPlace == .campus {
-                    Button("식단표 웹사이트") {
+                    Button {
                         viewModel.openCampusWebsite()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.up.right.square")
+                                .font(.system(size: 10))
+                            Text("식단표 웹사이트")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(6)
                     }
-                    .font(.caption2)
+                    .buttonStyle(.plain)
                 } else {
-                    Button("식단표 원본") {
+                    Button {
                         viewModel.openOriginalImage()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "photo")
+                                .font(.system(size: 10))
+                            Text("식단표 원본")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(6)
                     }
-                    .font(.caption2)
+                    .buttonStyle(.plain)
 
-                    Button("카카오 채널") {
+                    Button {
                         viewModel.openKakaoChannel()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "bubble.left.and.bubble.right")
+                                .font(.system(size: 10))
+                            Text("카카오 채널")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(6)
                     }
-                    .font(.caption2)
+                    .buttonStyle(.plain)
                 }
 
                 Spacer()
 
-                Button("새로고침") {
+                Button {
                     Task {
                         await viewModel.refresh(force: true)
                     }
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.system(size: 10))
+                        Text("새로고침")
+                            .font(.system(size: 11, weight: .medium))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 5)
+                    .background(Color.secondary.opacity(0.12))
+                    .foregroundColor(.primary)
+                    .cornerRadius(6)
                 }
-                .font(.caption2)
+                .buttonStyle(.plain)
             }
         }
         .padding(14)
