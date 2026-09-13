@@ -145,6 +145,57 @@ func testCafeteriaViewModelDefaults() {
     print("✅ testCafeteriaViewModelDefaults passed")
 }
 
+func testCampusCafeteriaMenuModels() {
+    assert(CafeteriaPlace.allCases == [.campus, .innovalley], "CafeteriaPlace cases mismatch")
+    assert(CafeteriaPlace.campus.displayName == "캠퍼스 식당", "Campus displayName mismatch")
+    assert(CafeteriaPlace.innovalley.displayName == "이노밸리 식당", "Innovalley displayName mismatch")
+
+    assert(MealType.lunch.operatingHours(for: .campus) == "11:30 - 13:30", "Campus lunch hours mismatch")
+    assert(MealType.dinner.operatingHours(for: .campus) == "17:30 - 19:00", "Campus dinner hours mismatch")
+
+    let mockDishes = [
+        CampusDish(name: "오돈불고기", isMain: true),
+        CampusDish(name: "순두부백탕", isMain: true),
+        CampusDish(name: "쌀밥", isMain: false)
+    ]
+    let mockMeal = CampusMeal(dishes: mockDishes, origin: "돈육:국내산")
+    let mockDay = CampusDayMenu(
+        date: "2026-09-14",
+        weekday: "월",
+        lunch: mockMeal,
+        dinner: nil,
+        dessert: "메밀차"
+    )
+    let mockWeekly = CampusWeeklyMenu(
+        weekStart: "2026-09-14",
+        weekEnd: "2026-09-18",
+        days: [mockDay]
+    )
+
+    assert(mockWeekly.menu(for: "월")?.meal(for: .lunch)?.dishes.count == 3, "Campus dishes count mismatch")
+    assert(mockWeekly.menu(for: "월")?.meal(for: .lunch)?.dishes.filter { $0.isMain }.count == 2, "Campus main dishes count mismatch")
+    assert(mockWeekly.menu(for: "월")?.dessert == "메밀차", "Campus dessert mismatch")
+    print("✅ testCampusCafeteriaMenuModels passed")
+}
+
+func testCampusCafeteriaLiveFetch() async throws {
+    let service = CafeteriaAPIService()
+    let menu = try await service.fetchCampusWeeklyMenu(forceRefresh: true)
+    assert(!menu.days.isEmpty, "Campus days should not be empty")
+    assert(menu.days.count >= 5, "Campus menu should have at least 5 days")
+
+    for day in ["월", "화", "수", "목", "금"] {
+        if let d = menu.menu(for: day) {
+            let lunchDishes = d.lunch?.dishes ?? []
+            print("🏢 [캠퍼스 \(day)요일] 점심 메뉴 수: \(lunchDishes.count), 디저트: \(d.dessert ?? "없음")")
+            let mains = lunchDishes.filter { $0.isMain }
+            assert(!lunchDishes.isEmpty, "\(day) campus lunch should have items")
+            assert(!mains.isEmpty, "\(day) campus lunch should have main dishes")
+        }
+    }
+    print("✅ testCampusCafeteriaLiveFetch passed")
+}
+
 func testCafeteriaLiveFetchAndParse() async throws {
     let service = CafeteriaAPIService()
     let menu = try await service.fetchWeeklyMenu(forceRefresh: true)
@@ -153,7 +204,7 @@ func testCafeteriaLiveFetchAndParse() async throws {
 
     for day in ["월", "화", "수", "목", "금"] {
         if let d = menu.menu(for: day) {
-            print("🍱 [\(day)요일] 점심 코너 수: \(d.lunch.count)")
+            print("🍱 [이노밸리 \(day)요일] 점심 코너 수: \(d.lunch.count)")
             for cat in d.lunch {
                 print("   [\(cat.cornerName)] \(cat.items.joined(separator: ", "))")
             }
@@ -162,6 +213,32 @@ func testCafeteriaLiveFetchAndParse() async throws {
     }
 
     print("✅ testCafeteriaLiveFetchAndParse passed")
+}
+
+@MainActor
+func testCafeteriaViewModelDualSupport() async {
+    let vm = CafeteriaViewModel()
+    // Test place switching and persistence
+    vm.selectedPlace = .campus
+    assert(vm.selectedPlace == .campus, "selectedPlace should be campus")
+    assert(UserDefaults.standard.string(forKey: CafeteriaViewModel.selectedPlaceStorageKey) == CafeteriaPlace.campus.rawValue, "UserDefaults should record campus")
+
+    let viewCampus = CafeteriaMenuView(viewModel: vm)
+    _ = viewCampus.body
+
+    vm.selectedPlace = .innovalley
+    assert(vm.selectedPlace == .innovalley, "selectedPlace should be innovalley")
+    assert(UserDefaults.standard.string(forKey: CafeteriaViewModel.selectedPlaceStorageKey) == CafeteriaPlace.innovalley.rawValue, "UserDefaults should record innovalley")
+
+    let viewInnovalley = CafeteriaMenuView(viewModel: vm)
+    _ = viewInnovalley.body
+
+    // Test open websites
+    vm.openCampusWebsite()
+    vm.openKakaoChannel()
+    vm.openOriginalImage()
+
+    print("✅ testCafeteriaViewModelDualSupport passed")
 }
 
 func testCommuteServiceKSTCheckOutGate() {
@@ -508,7 +585,10 @@ func main() async {
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
         testCafeteriaMenuModels()
+        testCampusCafeteriaMenuModels()
         await testCafeteriaViewModelDefaults()
+        await testCafeteriaViewModelDualSupport()
+        try await testCampusCafeteriaLiveFetch()
         try await testCafeteriaLiveFetchAndParse()
         testCommuteServiceKSTCheckOutGate()
         testCommuteNotificationDateComponents()

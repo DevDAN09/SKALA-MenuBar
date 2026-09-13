@@ -5,7 +5,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 APP_NAME="SKALA-MenuBar"
-VERSION="1.2.4"
+VERSION="1.3.0"
 BUNDLE_ID="com.skala.menubar"
 DIST_DIR="$PROJECT_ROOT/dist"
 ROOT_DIR="$DIST_DIR/root"
