@@ -7,6 +7,7 @@ struct SKALAMenuBarApp: App {
     @StateObject private var busViewModel = BusViewModel()
     @StateObject private var cafeteriaViewModel = CafeteriaViewModel()
     @StateObject private var commuteViewModel = CommuteViewModel()
+    @StateObject private var updateViewModel = UpdateViewModel()
 
     init() {
         // Hide Dock icon, keep app in macOS menu bar only
@@ -22,7 +23,8 @@ struct SKALAMenuBarApp: App {
             MainContainerView(
                 busViewModel: busViewModel,
                 cafeteriaViewModel: cafeteriaViewModel,
-                commuteViewModel: commuteViewModel
+                commuteViewModel: commuteViewModel,
+                updateViewModel: updateViewModel
             )
         } label: {
             Text(busViewModel.menuTitle)

@@ -17,7 +17,20 @@ public struct MainContainerView: View {
     @ObservedObject var busViewModel: BusViewModel
     @ObservedObject var cafeteriaViewModel: CafeteriaViewModel
     @ObservedObject var commuteViewModel: CommuteViewModel
+    @ObservedObject var updateViewModel: UpdateViewModel
     @State private var selectedTab: MainMenuTab = .bus
+
+    public init(
+        busViewModel: BusViewModel,
+        cafeteriaViewModel: CafeteriaViewModel,
+        commuteViewModel: CommuteViewModel,
+        updateViewModel: UpdateViewModel
+    ) {
+        self.busViewModel = busViewModel
+        self.cafeteriaViewModel = cafeteriaViewModel
+        self.commuteViewModel = commuteViewModel
+        self.updateViewModel = updateViewModel
+    }
 
     public init(
         busViewModel: BusViewModel,
@@ -27,68 +40,88 @@ public struct MainContainerView: View {
         self.busViewModel = busViewModel
         self.cafeteriaViewModel = cafeteriaViewModel
         self.commuteViewModel = commuteViewModel
+        self.updateViewModel = UpdateViewModel()
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 8) {
-                ForEach(MainMenuTab.allCases, id: \.self) { tab in
-                    let isSelected = selectedTab == tab
-                    Button {
-                        selectedTab = tab
-                        if tab == .commute {
-                            commuteViewModel.registerDeveloperModeClick()
-                        }
-                    } label: {
-                        HStack(spacing: 6) {
-                            switch tab {
-                            case .bus:
-                                Image(systemName: "bus.fill")
-                                    .font(.system(size: 13))
-                            case .cafeteria:
-                                Text("🍱")
-                                    .font(.system(size: 13))
-                            case .commute:
-                                Image(systemName: "clock.badge.checkmark")
-                                    .font(.system(size: 13))
+        ZStack {
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    ForEach(MainMenuTab.allCases, id: \.self) { tab in
+                        let isSelected = selectedTab == tab
+                        Button {
+                            selectedTab = tab
+                            if tab == .commute {
+                                commuteViewModel.registerDeveloperModeClick()
                             }
-                            Text(tab.title)
-                                .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                        } label: {
+                            HStack(spacing: 6) {
+                                switch tab {
+                                case .bus:
+                                    Image(systemName: "bus.fill")
+                                        .font(.system(size: 13))
+                                case .cafeteria:
+                                    Text("🍱")
+                                        .font(.system(size: 13))
+                                case .commute:
+                                    Image(systemName: "clock.badge.checkmark")
+                                        .font(.system(size: 13))
+                                }
+                                Text(tab.title)
+                                    .font(.system(size: 13, weight: isSelected ? .bold : .medium))
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 7)
+                            .background(isSelected ? Color.accentColor : Color.secondary.opacity(0.12))
+                            .foregroundColor(isSelected ? .white : .primary)
+                            .cornerRadius(8)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 7)
-                        .background(isSelected ? Color.accentColor : Color.secondary.opacity(0.12))
-                        .foregroundColor(isSelected ? .white : .primary)
-                        .cornerRadius(8)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
-            }
-            .padding(.horizontal, 14)
-            .padding(.top, 12)
-            .padding(.bottom, 8)
+                .padding(.horizontal, 14)
+                .padding(.top, 12)
+                .padding(.bottom, 8)
 
-            Divider()
+                // Update notification banner
+                UpdateBannerView(viewModel: updateViewModel)
 
-            Group {
-                switch selectedTab {
-                case .bus:
-                    BusStatusMenuView(viewModel: busViewModel)
-                case .cafeteria:
-                    CafeteriaMenuView(viewModel: cafeteriaViewModel)
-                case .commute:
-                    CommuteMenuView(viewModel: commuteViewModel)
+                Divider()
+
+                Group {
+                    switch selectedTab {
+                    case .bus:
+                        BusStatusMenuView(viewModel: busViewModel, updateViewModel: updateViewModel)
+                    case .cafeteria:
+                        CafeteriaMenuView(viewModel: cafeteriaViewModel)
+                    case .commute:
+                        CommuteMenuView(viewModel: commuteViewModel, updateViewModel: updateViewModel)
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+
+            if updateViewModel.showUpdateModal {
+                Color.black.opacity(0.4)
+                    .edgesIgnoringSafeArea(.all)
+                    .onTapGesture {
+                        updateViewModel.showUpdateModal = false
+                    }
+
+                UpdateModalView(viewModel: updateViewModel)
+                    .transition(.scale.combined(with: .opacity))
+            }
         }
         .frame(width: 320, height: 560)
         .background(WindowAnchorHelper())
+        .animation(.easeInOut(duration: 0.2), value: updateViewModel.showUpdateModal)
+        .animation(.easeInOut(duration: 0.2), value: updateViewModel.availableUpdate != nil)
         .task {
             async let busTask: () = busViewModel.refresh()
             async let cafeTask: () = cafeteriaViewModel.refresh()
             async let commuteTask: () = commuteViewModel.refresh()
-            _ = await (busTask, cafeTask, commuteTask)
+            async let updateTask: () = updateViewModel.checkForUpdates()
+            _ = await (busTask, cafeTask, commuteTask, updateTask)
         }
     }
 }

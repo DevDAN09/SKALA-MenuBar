@@ -49,6 +49,12 @@ curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/main/scripts
 - **단축키 지원**:
   - `⌘R`: 지금 즉시 새로고침
   - `⌘Q`: 앱 종료
+- **🚀 인앱 스마트 업데이트 확인 및 원클릭 설치**:
+  - **사용자 승인 필수**: 사용자의 명시적 동의 없이 몰래 백그라운드에서 강제 업데이트되거나 앱이 꺼지지 않습니다.
+  - 앱 실행 시 GitHub Releases 최신 버전을 스마트하게 감지 (상단 슬라이드 배너 및 상세 릴리즈 노트 모달 제공)
+  - '지금 설치', '나중에 하기', '이 버전 건너뛰기' 지원
+  - 하단 `[✨ 업데이트]` 버튼으로 언제든 수동 최신 버전 확인 가능
+  - 패키지(.pkg) 자동 다운로드 및 macOS 격리 속성(`quarantine`) 자동 해제 후 설치 관리자 원클릭 실행
 - **무의존성 & 초경량**:
   - 외부 유료 API 키나 브라우저 자동화 도구 불필요
   - 서드파티 라이브러리 의존성 0 (Apple Swift Standard Library, SwiftUI, Vision Native)

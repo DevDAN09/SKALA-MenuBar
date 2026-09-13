@@ -2,9 +2,11 @@ import SwiftUI
 
 public struct CommuteMenuView: View {
     @ObservedObject var viewModel: CommuteViewModel
+    var updateViewModel: UpdateViewModel?
 
-    public init(viewModel: CommuteViewModel) {
+    public init(viewModel: CommuteViewModel, updateViewModel: UpdateViewModel? = nil) {
         self.viewModel = viewModel
+        self.updateViewModel = updateViewModel
     }
 
     public var body: some View {
@@ -245,6 +247,27 @@ public struct CommuteMenuView: View {
                     .foregroundColor(.secondary)
 
                 Spacer()
+
+                if let updateVM = updateViewModel {
+                    Button {
+                        Task {
+                            await updateVM.checkForUpdates(manual: true)
+                        }
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 9))
+                            Text("업데이트")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 5)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
 
                 Button {
                     NSApplication.shared.terminate(nil)

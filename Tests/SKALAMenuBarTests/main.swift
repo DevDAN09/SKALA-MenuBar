@@ -579,6 +579,84 @@ func testMainMenuTabAndContainerView() {
     print("✅ testMainMenuTabAndContainerView passed")
 }
 
+func testVersionComparator() {
+    assert(VersionComparator.clean("v1.3.0") == "1.3.0", "Prefix v should be removed")
+    assert(VersionComparator.clean("V1.2.4") == "1.2.4", "Prefix V should be removed")
+    assert(VersionComparator.clean("  1.3.0  ") == "1.3.0", "Whitespace should be trimmed")
+
+    assert(VersionComparator.isNewer(remote: "1.3.1", current: "1.3.0"), "1.3.1 should be newer than 1.3.0")
+    assert(VersionComparator.isNewer(remote: "2.0.0", current: "1.9.9"), "2.0.0 should be newer than 1.9.9")
+    assert(!VersionComparator.isNewer(remote: "1.3.0", current: "1.3.0"), "Same version should not be newer")
+    assert(!VersionComparator.isNewer(remote: "1.2.4", current: "1.3.0"), "1.2.4 should not be newer than 1.3.0")
+    assert(VersionComparator.isNewer(remote: "v1.4.0", current: "1.3.0"), "v1.4.0 should be newer than 1.3.0")
+    print("✅ testVersionComparator passed")
+}
+
+func testUpdateModelsAndJSONParsing() throws {
+    let mockJSON = """
+    {
+      "tag_name": "v1.4.0",
+      "name": "Release v1.4.0",
+      "body": "• 신규 기능 추가\\n• 버그 수정",
+      "html_url": "https://github.com/DevDAN09/SKALA-MenuBar/releases/tag/v1.4.0",
+      "assets": [
+        {
+          "name": "SKALA-MenuBar.pkg",
+          "browser_download_url": "https://example.com/SKALA-MenuBar.pkg"
+        }
+      ]
+    }
+    """.data(using: .utf8)!
+
+    let release = try JSONDecoder().decode(GitHubReleaseResponse.self, from: mockJSON)
+    assert(release.tag_name == "v1.4.0", "tag_name mismatch")
+    assert(release.assets.first?.browser_download_url == "https://example.com/SKALA-MenuBar.pkg", "asset download URL mismatch")
+
+    let updateInfo = UpdateInfo(
+        version: VersionComparator.clean(release.tag_name),
+        title: release.name ?? "",
+        releaseNotes: release.body ?? "",
+        pkgDownloadUrl: release.assets.first!.browser_download_url,
+        releaseWebUrl: release.html_url
+    )
+    assert(updateInfo.version == "1.4.0", "updateInfo version mismatch")
+    assert(updateInfo.pkgDownloadUrl == "https://example.com/SKALA-MenuBar.pkg", "pkgDownloadUrl mismatch")
+    print("✅ testUpdateModelsAndJSONParsing passed")
+}
+
+@MainActor
+func testUpdateViewModelAndViews() {
+    let vm = UpdateViewModel()
+    assert(vm.currentVersionString.hasPrefix("v"), "currentVersionString should start with v")
+
+    let sampleUpdate = UpdateInfo(
+        version: "9.9.9",
+        title: "Release v9.9.9",
+        releaseNotes: "• 테스트 릴리즈 노트",
+        pkgDownloadUrl: "https://example.com/test.pkg",
+        releaseWebUrl: "https://example.com/release"
+    )
+
+    vm.availableUpdate = sampleUpdate
+    vm.isDismissed = false
+    assert(vm.availableUpdate?.version == "9.9.9", "availableUpdate mismatch")
+
+    let banner = UpdateBannerView(viewModel: vm)
+    _ = banner.body
+
+    vm.showUpdateModal = true
+    let modal = UpdateModalView(viewModel: vm)
+    _ = modal.body
+
+    vm.dismissBanner()
+    assert(vm.isDismissed, "isDismissed should be true after dismissBanner()")
+
+    vm.skipThisVersion()
+    assert(UserDefaults.standard.string(forKey: UpdateViewModel.skippedVersionKey) == "9.9.9", "Skipped version should be recorded")
+
+    print("✅ testUpdateViewModelAndViews passed")
+}
+
 func main() async {
     do {
         testTargetBusStopMapping()
@@ -598,6 +676,9 @@ func main() async {
         await testCommuteViewModelLogic()
         await testCommuteMenuView()
         await testMainMenuTabAndContainerView()
+        testVersionComparator()
+        try testUpdateModelsAndJSONParsing()
+        await testUpdateViewModelAndViews()
         print("🎉 All PangyoBus & Cafeteria tests passed successfully!")
     } catch {
         print("❌ Test failed: \(error)")

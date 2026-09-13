@@ -3,9 +3,11 @@ import AppKit
 
 public struct BusStatusMenuView: View {
     @ObservedObject var viewModel: BusViewModel
+    var updateViewModel: UpdateViewModel?
 
-    public init(viewModel: BusViewModel) {
+    public init(viewModel: BusViewModel, updateViewModel: UpdateViewModel? = nil) {
         self.viewModel = viewModel
+        self.updateViewModel = updateViewModel
     }
 
     public var body: some View {
@@ -118,6 +120,27 @@ public struct BusStatusMenuView: View {
                     .foregroundColor(.secondary)
 
                 Spacer()
+
+                if let updateVM = updateViewModel {
+                    Button {
+                        Task {
+                            await updateVM.checkForUpdates(manual: true)
+                        }
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sparkles")
+                                .font(.system(size: 9))
+                            Text("업데이트")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 5)
+                        .background(Color.secondary.opacity(0.12))
+                        .foregroundColor(.primary)
+                        .cornerRadius(6)
+                    }
+                    .buttonStyle(.plain)
+                }
 
                 Button {
                     Task {
