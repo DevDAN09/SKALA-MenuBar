@@ -566,7 +566,7 @@ func testMainMenuTabAndContainerView() {
     assert(MainMenuTab.allCases == [.bus, .cafeteria, .commute], "MainMenuTab.allCases must be [.bus, .cafeteria, .commute]")
     assert(MainMenuTab.bus.title == "버스", "bus title mismatch")
     assert(MainMenuTab.cafeteria.title == "식당", "cafeteria title mismatch")
-    assert(MainMenuTab.commute.title == "출퇴근", "commute title mismatch")
+    assert(MainMenuTab.commute.title == "생활", "commute title mismatch")
 
     let busVM = BusViewModel(apiService: BusAPIService(session: makeMockBusSession()))
     busVM.stopAutoRefresh()

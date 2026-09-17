@@ -32,7 +32,36 @@ public struct CommuteMenuView: View {
                         viewModel.registerDeveloperModeClick()
                     }
 
-                    // 2. Tabling Spaces Shortcut Button
+                    // 2. SKCT Practice Environment Launcher Button
+                    Button {
+                        SKCTWindowController.shared.show()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "pencil.and.ruler.fill")
+                                .font(.system(size: 13))
+                                .foregroundColor(.accentColor)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("SKCT 온라인 연습장")
+                                    .font(.system(size: 12, weight: .bold))
+                                    .foregroundColor(.primary)
+                                Text("화이트보드 & CBT 계산기 모의 환경")
+                                    .font(.system(size: 10))
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.forward.app")
+                                .font(.system(size: 12))
+                                .foregroundColor(.accentColor)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 8)
+                        .background(Color.accentColor.opacity(0.12))
+                        .cornerRadius(8)
+                    }
+                    .buttonStyle(.plain)
+
+                    // 3. Tabling Spaces Shortcut Button
                     Button {
                         if let url = URL(string: "https://tabling.skala-ai.com/spaces") {
                             NSWorkspace.shared.open(url)

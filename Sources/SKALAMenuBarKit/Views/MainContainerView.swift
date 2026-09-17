@@ -7,7 +7,7 @@ public enum MainMenuTab: CaseIterable {
         switch self {
         case .bus: return "버스"
         case .cafeteria: return "식당"
-        case .commute: return "출퇴근"
+        case .commute: return "생활"
         }
     }
 }
@@ -64,7 +64,7 @@ public struct MainContainerView: View {
                                     Text("🍱")
                                         .font(.system(size: 13))
                                 case .commute:
-                                    Image(systemName: "clock.badge.checkmark")
+                                    Image(systemName: "house.fill")
                                         .font(.system(size: 13))
                                 }
                                 Text(tab.title)
