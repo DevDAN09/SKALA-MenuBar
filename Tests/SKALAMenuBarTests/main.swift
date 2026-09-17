@@ -657,8 +657,67 @@ func testUpdateViewModelAndViews() {
     print("✅ testUpdateViewModelAndViews passed")
 }
 
+func testSKCTCalculatorEngine() {
+    var engine = SKCTCalculatorEngine()
+    assert(engine.displayText == "0", "Initial display should be 0")
+
+    // 12 + 34 = 46
+    engine.inputDigit("1")
+    engine.inputDigit("2")
+    assert(engine.displayText == "12")
+    engine.inputOperation(.add)
+    engine.inputDigit("3")
+    engine.inputDigit("4")
+    assert(engine.displayText == "34")
+    engine.calculateEquals()
+    assert(engine.displayText == "46", "12 + 34 should be 46")
+
+    // Decimal point test: 3.5 * 2 = 7
+    engine.clear()
+    engine.inputDigit("3")
+    engine.inputDecimal()
+    engine.inputDigit("5")
+    assert(engine.displayText == "3.5")
+    engine.inputOperation(.multiply)
+    engine.inputDigit("2")
+    engine.calculateEquals()
+    assert(engine.displayText == "7", "3.5 * 2 should be 7")
+
+    // Percent test: 50 % = 0.5
+    engine.clear()
+    engine.inputDigit("5")
+    engine.inputDigit("0")
+    engine.applyPercent()
+    assert(engine.displayText == "0.5", "50% should be 0.5")
+
+    // Toggle sign
+    engine.toggleSign()
+    assert(engine.displayText == "-0.5", "Sign toggle should make it -0.5")
+    engine.toggleSign()
+    assert(engine.displayText == "0.5")
+
+    // Backspace test
+    engine.clear()
+    engine.inputDigit("1")
+    engine.inputDigit("2")
+    engine.inputDigit("5")
+    engine.backspace()
+    assert(engine.displayText == "12")
+
+    // Divide by zero
+    engine.clear()
+    engine.inputDigit("8")
+    engine.inputOperation(.divide)
+    engine.inputDigit("0")
+    engine.calculateEquals()
+    assert(engine.displayText == "오류", "Divide by zero should show 오류")
+
+    print("✅ testSKCTCalculatorEngine passed")
+}
+
 func main() async {
     do {
+        testSKCTCalculatorEngine()
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
