@@ -380,6 +380,20 @@ func testCommuteWebWindowController() {
     print("✅ testCommuteWebWindowController passed")
 }
 
+@MainActor
+func testSKCTWindowController() {
+    let controller = SKCTWindowController.shared
+    controller.show()
+    guard let window = controller.window else {
+        assertionFailure("SKCT Window should not be nil")
+        return
+    }
+    assert(window.title == "SKCT 모의 환경 (화이트보드 & 계산기)", "Window title mismatch: \(window.title)")
+    assert(window.frame.width >= 800, "Window width should be at least 800")
+    assert(window.frame.height >= 550, "Window height should be at least 550")
+    print("✅ testSKCTWindowController passed")
+}
+
 final class MockCommuteService: CommuteServiceProtocol, @unchecked Sendable {
     var targetSSID: String = "skaxedu"
     var targetURL: URL = URL(string: "https://att.skala-ai.com/att-checkin")!
@@ -552,7 +566,7 @@ func testMainMenuTabAndContainerView() {
     assert(MainMenuTab.allCases == [.bus, .cafeteria, .commute], "MainMenuTab.allCases must be [.bus, .cafeteria, .commute]")
     assert(MainMenuTab.bus.title == "버스", "bus title mismatch")
     assert(MainMenuTab.cafeteria.title == "식당", "cafeteria title mismatch")
-    assert(MainMenuTab.commute.title == "출퇴근", "commute title mismatch")
+    assert(MainMenuTab.commute.title == "생활", "commute title mismatch")
 
     let busVM = BusViewModel(apiService: BusAPIService(session: makeMockBusSession()))
     busVM.stopAutoRefresh()
@@ -657,8 +671,100 @@ func testUpdateViewModelAndViews() {
     print("✅ testUpdateViewModelAndViews passed")
 }
 
+func testSKCTCalculatorEngine() {
+    var engine = SKCTCalculatorEngine()
+    assert(engine.displayText == "0", "Initial display should be 0")
+
+    // 12 + 34 = 46
+    engine.inputDigit("1")
+    engine.inputDigit("2")
+    assert(engine.displayText == "12")
+    engine.inputOperation(.add)
+    engine.inputDigit("3")
+    engine.inputDigit("4")
+    assert(engine.displayText == "34")
+    engine.calculateEquals()
+    assert(engine.displayText == "46", "12 + 34 should be 46")
+
+    // Decimal point test: 3.5 * 2 = 7
+    engine.clear()
+    engine.inputDigit("3")
+    engine.inputDecimal()
+    engine.inputDigit("5")
+    assert(engine.displayText == "3.5")
+    engine.inputOperation(.multiply)
+    engine.inputDigit("2")
+    engine.calculateEquals()
+    assert(engine.displayText == "7", "3.5 * 2 should be 7")
+
+    // Percent test: 50 % = 0.5
+    engine.clear()
+    engine.inputDigit("5")
+    engine.inputDigit("0")
+    engine.applyPercent()
+    assert(engine.displayText == "0.5", "50% should be 0.5")
+
+    // Toggle sign
+    engine.toggleSign()
+    assert(engine.displayText == "-0.5", "Sign toggle should make it -0.5")
+    engine.toggleSign()
+    assert(engine.displayText == "0.5")
+
+    // Backspace test
+    engine.clear()
+    engine.inputDigit("1")
+    engine.inputDigit("2")
+    engine.inputDigit("5")
+    engine.backspace()
+    assert(engine.displayText == "12")
+
+    // Divide by zero
+    engine.clear()
+    engine.inputDigit("8")
+    engine.inputOperation(.divide)
+    engine.inputDigit("0")
+    engine.calculateEquals()
+    assert(engine.displayText == "오류", "Divide by zero should show 오류")
+
+    print("✅ testSKCTCalculatorEngine passed")
+}
+
+@MainActor
+func testSKCTDrawingViewModel() {
+    let vm = SKCTDrawingViewModel()
+    assert(vm.activeTool == .pen)
+    assert(vm.strokes.isEmpty)
+
+    // Draw stroke
+    vm.startStroke(at: CGPoint(x: 10, y: 10))
+    vm.continueStroke(to: CGPoint(x: 20, y: 20))
+    vm.finishStroke()
+    assert(vm.strokes.count == 1, "Should have 1 stroke")
+
+    // Undo
+    vm.undo()
+    assert(vm.strokes.isEmpty, "Should be empty after undo")
+    vm.redo()
+    assert(vm.strokes.count == 1, "Should restore after redo")
+
+    // Clear All
+    vm.clearAll()
+    assert(vm.strokes.isEmpty, "Should be empty after clearAll")
+    vm.undo()
+    assert(vm.strokes.count == 1, "Undo should restore cleared canvas")
+
+    // Eraser
+    vm.activeTool = .eraser
+    vm.eraseStrokes(near: CGPoint(x: 15, y: 15))
+    assert(vm.strokes.isEmpty, "Intersecting stroke should be erased")
+
+    print("✅ testSKCTDrawingViewModel passed")
+}
+
 func main() async {
     do {
+        testSKCTCalculatorEngine()
+        await testSKCTDrawingViewModel()
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
@@ -672,6 +778,7 @@ func main() async {
         testCommuteNotificationDateComponents()
         await testCommuteNotificationService()
         await testCommuteWebWindowController()
+        await testSKCTWindowController()
         await testCommuteViewModelInitialState()
         await testCommuteViewModelLogic()
         await testCommuteMenuView()

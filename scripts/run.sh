@@ -12,6 +12,7 @@ pkill -f "SKALA-MenuBar" || true
 pkill -f "PangyoBus" || true
 
 echo "🚀 Starting SKALA-MenuBar in background..."
-"$DIR/.build/release/SKALA-MenuBar" > /dev/null 2>&1 &
+nohup "$DIR/.build/release/SKALA-MenuBar" > /dev/null 2>&1 &
+disown
 
 echo "✨ SKALA-MenuBar is now running in your macOS menu bar!"
