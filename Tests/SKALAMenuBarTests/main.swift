@@ -715,9 +715,42 @@ func testSKCTCalculatorEngine() {
     print("✅ testSKCTCalculatorEngine passed")
 }
 
+@MainActor
+func testSKCTDrawingViewModel() {
+    let vm = SKCTDrawingViewModel()
+    assert(vm.activeTool == .pen)
+    assert(vm.strokes.isEmpty)
+
+    // Draw stroke
+    vm.startStroke(at: CGPoint(x: 10, y: 10))
+    vm.continueStroke(to: CGPoint(x: 20, y: 20))
+    vm.finishStroke()
+    assert(vm.strokes.count == 1, "Should have 1 stroke")
+
+    // Undo
+    vm.undo()
+    assert(vm.strokes.isEmpty, "Should be empty after undo")
+    vm.redo()
+    assert(vm.strokes.count == 1, "Should restore after redo")
+
+    // Clear All
+    vm.clearAll()
+    assert(vm.strokes.isEmpty, "Should be empty after clearAll")
+    vm.undo()
+    assert(vm.strokes.count == 1, "Undo should restore cleared canvas")
+
+    // Eraser
+    vm.activeTool = .eraser
+    vm.eraseStrokes(near: CGPoint(x: 15, y: 15))
+    assert(vm.strokes.isEmpty, "Intersecting stroke should be erased")
+
+    print("✅ testSKCTDrawingViewModel passed")
+}
+
 func main() async {
     do {
         testSKCTCalculatorEngine()
+        await testSKCTDrawingViewModel()
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
