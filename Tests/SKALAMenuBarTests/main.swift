@@ -380,6 +380,20 @@ func testCommuteWebWindowController() {
     print("✅ testCommuteWebWindowController passed")
 }
 
+@MainActor
+func testSKCTWindowController() {
+    let controller = SKCTWindowController.shared
+    controller.show()
+    guard let window = controller.window else {
+        assertionFailure("SKCT Window should not be nil")
+        return
+    }
+    assert(window.title == "SKCT 모의 환경 (화이트보드 & 계산기)", "Window title mismatch: \(window.title)")
+    assert(window.frame.width >= 800, "Window width should be at least 800")
+    assert(window.frame.height >= 550, "Window height should be at least 550")
+    print("✅ testSKCTWindowController passed")
+}
+
 final class MockCommuteService: CommuteServiceProtocol, @unchecked Sendable {
     var targetSSID: String = "skaxedu"
     var targetURL: URL = URL(string: "https://att.skala-ai.com/att-checkin")!
@@ -764,6 +778,7 @@ func main() async {
         testCommuteNotificationDateComponents()
         await testCommuteNotificationService()
         await testCommuteWebWindowController()
+        await testSKCTWindowController()
         await testCommuteViewModelInitialState()
         await testCommuteViewModelLogic()
         await testCommuteMenuView()
