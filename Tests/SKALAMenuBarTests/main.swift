@@ -767,6 +767,12 @@ func testSKCTTimerViewModel() {
     assert(timerVM.timeString == "00:00")
     assert(!timerVM.isRunning)
 
+    // Set 15m
+    timerVM.addMinutes(15)
+    assert(timerVM.totalSeconds == 900)
+    assert(timerVM.timeString == "15:00")
+    timerVM.reset()
+
     // Set 1m 30s
     timerVM.addMinutes(1)
     timerVM.addSeconds(30)

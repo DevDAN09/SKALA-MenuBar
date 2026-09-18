@@ -273,6 +273,16 @@ public struct SKCTWhiteboardView: View {
             // Minute and Second adjustment buttons (when not running)
             if !timerViewModel.isRunning {
                 HStack(spacing: 3) {
+                    Button("+15분") {
+                        timerViewModel.addMinutes(15)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(4)
+
                     Button("+1분") {
                         timerViewModel.addMinutes(1)
                     }
