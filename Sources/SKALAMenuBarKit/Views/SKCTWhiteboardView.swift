@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct SKCTWhiteboardView: View {
     @ObservedObject var viewModel: SKCTDrawingViewModel
+    @StateObject private var timerViewModel = SKCTTimerViewModel()
     @State private var isDragging = false
 
     public init(viewModel: SKCTDrawingViewModel) {
@@ -128,9 +129,15 @@ public struct SKCTWhiteboardView: View {
             .opacity(viewModel.activeTool == .pen ? 1.0 : 0.4)
             .disabled(viewModel.activeTool != .pen)
 
+            Divider()
+                .frame(height: 20)
+
+            // 4. Timer Widget (MM:SS)
+            timerWidgetView
+
             Spacer()
 
-            // 4. History (Undo / Redo)
+            // 5. History (Undo / Redo)
             HStack(spacing: 4) {
                 Button {
                     viewModel.undo()
@@ -223,6 +230,107 @@ public struct SKCTWhiteboardView: View {
         }
         .buttonStyle(.plain)
         .help("\(name) 색상")
+    }
+
+    private var timerWidgetView: some View {
+        HStack(spacing: 6) {
+            Image(systemName: timerViewModel.isCountdown ? "timer" : "stopwatch")
+                .font(.system(size: 11))
+                .foregroundColor(timerViewModel.isFinished ? .red : (timerViewModel.isRunning ? .green : .accentColor))
+
+            Text(timerViewModel.timeString)
+                .font(.system(size: 13, weight: .bold, design: .monospaced))
+                .foregroundColor(timerViewModel.isFinished ? .red : .primary)
+
+            // Start / Pause button
+            Button {
+                timerViewModel.toggle()
+            } label: {
+                Image(systemName: timerViewModel.isRunning ? "pause.fill" : "play.fill")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(width: 20, height: 20)
+                    .background(timerViewModel.isRunning ? Color.orange : Color.green)
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .help(timerViewModel.isRunning ? "일시정지" : "시작")
+
+            // Reset button
+            Button {
+                timerViewModel.reset()
+            } label: {
+                Image(systemName: "arrow.counterclockwise")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(.secondary)
+                    .frame(width: 20, height: 20)
+                    .background(Color.secondary.opacity(0.12))
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .help("타이머 초기화")
+
+            // Minute and Second adjustment buttons (when not running)
+            if !timerViewModel.isRunning {
+                HStack(spacing: 3) {
+                    Button("+15분") {
+                        timerViewModel.addMinutes(15)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(4)
+
+                    Button("+1분") {
+                        timerViewModel.addMinutes(1)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(4)
+
+                    Button("+10초") {
+                        timerViewModel.addSeconds(10)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .medium))
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background(Color.secondary.opacity(0.1))
+                    .cornerRadius(4)
+
+                    if timerViewModel.totalSeconds > 0 {
+                        Button("-1분") {
+                            timerViewModel.addMinutes(-1)
+                        }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 10, weight: .medium))
+                        .padding(.horizontal, 5)
+                        .padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.1))
+                        .cornerRadius(4)
+                    }
+                }
+            }
+
+            if timerViewModel.isFinished {
+                Text("종료!")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(.red)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 3)
+        .background(Color.secondary.opacity(0.08))
+        .cornerRadius(6)
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(timerViewModel.isFinished ? Color.red.opacity(0.6) : Color.clear, lineWidth: 1.5)
+        )
     }
 
     private func widthButton(width: CGFloat, label: String) -> some View {
