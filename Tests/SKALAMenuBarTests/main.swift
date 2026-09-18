@@ -761,10 +761,60 @@ func testSKCTDrawingViewModel() {
     print("✅ testSKCTDrawingViewModel passed")
 }
 
+@MainActor
+func testSKCTTimerViewModel() {
+    let timerVM = SKCTTimerViewModel()
+    assert(timerVM.timeString == "00:00")
+    assert(!timerVM.isRunning)
+
+    // Set 1m 30s
+    timerVM.addMinutes(1)
+    timerVM.addSeconds(30)
+    assert(timerVM.totalSeconds == 90)
+    assert(timerVM.timeString == "01:30")
+
+    // Start countdown
+    timerVM.start()
+    assert(timerVM.isRunning)
+    assert(timerVM.isCountdown)
+
+    // Tick once
+    timerVM.tick()
+    assert(timerVM.totalSeconds == 89)
+    assert(timerVM.timeString == "01:29")
+
+    // Jump to 1 second remaining and tick to finish
+    timerVM.totalSeconds = 1
+    timerVM.tick()
+    assert(timerVM.totalSeconds == 0)
+    assert(!timerVM.isRunning)
+    assert(timerVM.isFinished)
+
+    // Reset
+    timerVM.reset()
+    assert(timerVM.totalSeconds == 0)
+    assert(!timerVM.isFinished)
+    assert(timerVM.timeString == "00:00")
+
+    // Stopwatch mode (start from 00:00)
+    timerVM.start()
+    assert(timerVM.isRunning)
+    assert(!timerVM.isCountdown)
+    timerVM.tick()
+    assert(timerVM.totalSeconds == 1)
+    assert(timerVM.timeString == "00:01")
+
+    timerVM.pause()
+    assert(!timerVM.isRunning)
+
+    print("✅ testSKCTTimerViewModel passed")
+}
+
 func main() async {
     do {
         testSKCTCalculatorEngine()
         await testSKCTDrawingViewModel()
+        await testSKCTTimerViewModel()
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
