@@ -154,28 +154,87 @@ public struct SKCTCalculatorView: View {
     private func setupKeyboardMonitor() {
         guard keyMonitor == nil else { return }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-            // Do not intercept keystrokes if user is actively typing in an editable text view (e.g. SKCTNotepadView)
-            if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView, responder.isEditable {
-                return event
-            }
-
-            guard let chars = event.characters else { return event }
             let keyCode = event.keyCode
 
-            // Check if user is typing on calculator
+            // Check if key is from the dedicated numeric keypad (Numpad)
+            let isNumpadKey: Bool
+            switch keyCode {
+            case 65, 67, 69, 71, 75, 76, 78, 81, 82...89, 91, 92:
+                isNumpadKey = true
+            default:
+                isNumpadKey = false
+            }
+
+            // If an editable text responder currently has focus (e.g. SKCTNotepadView):
+            // - Numpad keys are routed directly to the CBT Calculator
+            // - Normal keyboard keys pass through to the text editor
+            if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView, responder.isEditable {
+                if !isNumpadKey {
+                    return event
+                }
+            }
+
+            // Direct KeyCode handling (guarantees numpad input regardless of input source/IME)
             switch keyCode {
             case 51: // Delete/Backspace
                 engine.backspace()
                 return nil
-            case 53: // Escape
+            case 53, 71: // Escape or Keypad Clear
                 engine.clear()
                 return nil
-            case 36, 76: // Return or Keypad Enter
+            case 36, 76, 81: // Return, Keypad Enter, or Keypad Equals
                 engine.calculateEquals()
+                return nil
+            case 65: // Keypad Decimal (.)
+                engine.inputDecimal()
+                return nil
+            case 67: // Keypad Multiply (*)
+                engine.inputOperation(.multiply)
+                return nil
+            case 69: // Keypad Plus (+)
+                engine.inputOperation(.add)
+                return nil
+            case 75: // Keypad Divide (/)
+                engine.inputOperation(.divide)
+                return nil
+            case 78: // Keypad Minus (-)
+                engine.inputOperation(.subtract)
+                return nil
+            case 82: // Keypad 0
+                engine.inputDigit("0")
+                return nil
+            case 83: // Keypad 1
+                engine.inputDigit("1")
+                return nil
+            case 84: // Keypad 2
+                engine.inputDigit("2")
+                return nil
+            case 85: // Keypad 3
+                engine.inputDigit("3")
+                return nil
+            case 86: // Keypad 4
+                engine.inputDigit("4")
+                return nil
+            case 87: // Keypad 5
+                engine.inputDigit("5")
+                return nil
+            case 88: // Keypad 6
+                engine.inputDigit("6")
+                return nil
+            case 89: // Keypad 7
+                engine.inputDigit("7")
+                return nil
+            case 91: // Keypad 8
+                engine.inputDigit("8")
+                return nil
+            case 92: // Keypad 9
+                engine.inputDigit("9")
                 return nil
             default:
                 break
             }
+
+            guard let chars = event.characters else { return event }
 
             for char in chars {
                 switch char {
