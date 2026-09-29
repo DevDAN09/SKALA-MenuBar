@@ -15,14 +15,12 @@ public struct SKCTPracticeView: View {
                 twoTierHeaderView
 
                 // Workspace Content Area (Notepad or Whiteboard Canvas)
-                ZStack {
-                    SKCTWhiteboardCanvasView(viewModel: drawingViewModel)
-                        .opacity(activeMode == .whiteboard ? 1 : 0)
-                        .allowsHitTesting(activeMode == .whiteboard)
-
-                    SKCTNotepadView(viewModel: notepadViewModel)
-                        .opacity(activeMode == .notepad ? 1 : 0)
-                        .allowsHitTesting(activeMode == .notepad)
+                Group {
+                    if activeMode == .notepad {
+                        SKCTNotepadView(viewModel: notepadViewModel)
+                    } else {
+                        SKCTWhiteboardCanvasView(viewModel: drawingViewModel)
+                    }
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
@@ -33,6 +31,11 @@ public struct SKCTPracticeView: View {
                 .padding(.trailing, 16)
         }
         .frame(minWidth: 800, minHeight: 550)
+        .onChange(of: activeMode) { newMode in
+            if newMode == .whiteboard {
+                NSApplication.shared.keyWindow?.makeFirstResponder(nil)
+            }
+        }
     }
 
     // MARK: - 2-Tier Header
@@ -87,6 +90,9 @@ public struct SKCTPracticeView: View {
         let isSelected = activeMode == mode
         return Button {
             activeMode = mode
+            if mode == .whiteboard {
+                NSApplication.shared.keyWindow?.makeFirstResponder(nil)
+            }
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: icon)

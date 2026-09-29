@@ -860,9 +860,17 @@ func testSKCTNotepadAndMode() {
     print("✅ testSKCTNotepadAndMode passed")
 }
 
+@MainActor
+func testSKCTCalculatorView() {
+    let calcView = SKCTCalculatorView()
+    _ = calcView.body
+    print("✅ testSKCTCalculatorView passed")
+}
+
 func main() async {
     do {
         testSKCTCalculatorEngine()
+        await testSKCTCalculatorView()
         await testSKCTDrawingViewModel()
         await testSKCTTimerViewModel()
         await testSKCTNotepadAndMode()
