@@ -12,7 +12,7 @@ public final class SKCTWindowController: NSWindowController {
             backing: .buffered,
             defer: false
         )
-        window.title = "SKCT 모의 환경 (화이트보드 & 계산기)"
+        window.title = "SKCT 모의 환경 (메모장 · 화이트보드 & 계산기)"
         window.minSize = NSSize(width: 800, height: 550)
         window.center()
         window.isReleasedWhenClosed = false

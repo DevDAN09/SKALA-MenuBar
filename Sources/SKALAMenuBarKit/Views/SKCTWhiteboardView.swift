@@ -21,76 +21,7 @@ public struct SKCTWhiteboardView: View {
                 )
 
             // Drawing Canvas
-            GeometryReader { geometry in
-                ZStack {
-                    // Whiteboard background (Clean white / dark mode aware canvas with subtle dot grid)
-                    Color(nsColor: .textBackgroundColor)
-                        .edgesIgnoringSafeArea(.all)
-
-                    GridBackgroundPattern()
-                        .opacity(0.12)
-
-                    Canvas { context, size in
-                        // 1. Render all committed strokes
-                        for stroke in viewModel.strokes {
-                            var path = Path()
-                            guard let first = stroke.points.first else { continue }
-                            path.move(to: first)
-                            for pt in stroke.points.dropFirst() {
-                                path.addLine(to: pt)
-                            }
-                            context.stroke(
-                                path,
-                                with: .color(stroke.color),
-                                style: StrokeStyle(lineWidth: stroke.lineWidth, lineCap: .round, lineJoin: .round)
-                            )
-                        }
-
-                        // 2. Render current dragging stroke
-                        if let active = viewModel.currentStroke {
-                            var path = Path()
-                            if let first = active.points.first {
-                                path.move(to: first)
-                                for pt in active.points.dropFirst() {
-                                    path.addLine(to: pt)
-                                }
-                                context.stroke(
-                                    path,
-                                    with: .color(active.color),
-                                    style: StrokeStyle(lineWidth: active.lineWidth, lineCap: .round, lineJoin: .round)
-                                )
-                            }
-                        }
-
-                        // 3. Eraser cursor ring guide
-                        if viewModel.activeTool == .eraser, let mouseLoc = viewModel.currentMouseLocation {
-                            let r = viewModel.eraserRadius
-                            let rect = CGRect(x: mouseLoc.x - r, y: mouseLoc.y - r, width: r * 2, height: r * 2)
-                            let ringPath = Path(ellipseIn: rect)
-                            context.stroke(
-                                ringPath,
-                                with: .color(.secondary),
-                                style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])
-                            )
-                        }
-                    }
-                    .gesture(
-                        DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                            .onChanged { value in
-                                if !isDragging {
-                                    isDragging = true
-                                    viewModel.startStroke(at: value.location)
-                                } else {
-                                    viewModel.continueStroke(to: value.location)
-                                }
-                            }
-                            .onEnded { _ in
-                                isDragging = false
-                                viewModel.finishStroke()
-                            }
-                    )
-                }
-            }
+            SKCTWhiteboardCanvasView(viewModel: viewModel)
         }
     }
 
@@ -273,6 +204,18 @@ public struct SKCTWhiteboardView: View {
             // Minute and Second adjustment buttons (when not running)
             if !timerViewModel.isRunning {
                 HStack(spacing: 3) {
+                    Button("45초") {
+                        timerViewModel.setPreset(seconds: 45)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 10, weight: .bold))
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 3)
+                    .background(Color.orange.opacity(0.18))
+                    .foregroundColor(.orange)
+                    .cornerRadius(4)
+                    .help("문항당 45초 카운트다운 프리셋")
+
                     Button("+15분") {
                         timerViewModel.addMinutes(15)
                     }
@@ -351,8 +294,10 @@ public struct SKCTWhiteboardView: View {
 }
 
 // Background grid pattern to emulate paper/memo board
-struct GridBackgroundPattern: View {
-    var body: some View {
+public struct GridBackgroundPattern: View {
+    public init() {}
+
+    public var body: some View {
         Canvas { context, size in
             let step: CGFloat = 24.0
             var x: CGFloat = step
@@ -364,6 +309,88 @@ struct GridBackgroundPattern: View {
                     y += step
                 }
                 x += step
+            }
+        }
+    }
+}
+
+public struct SKCTWhiteboardCanvasView: View {
+    @ObservedObject var viewModel: SKCTDrawingViewModel
+    @State private var isDragging = false
+
+    public init(viewModel: SKCTDrawingViewModel) {
+        self.viewModel = viewModel
+    }
+
+    public var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                // Whiteboard background (Clean white / dark mode aware canvas with subtle dot grid)
+                Color(nsColor: .textBackgroundColor)
+                    .edgesIgnoringSafeArea(.all)
+
+                GridBackgroundPattern()
+                    .opacity(0.12)
+
+                Canvas { context, size in
+                    // 1. Render all committed strokes
+                    for stroke in viewModel.strokes {
+                        var path = Path()
+                        guard let first = stroke.points.first else { continue }
+                        path.move(to: first)
+                        for pt in stroke.points.dropFirst() {
+                            path.addLine(to: pt)
+                        }
+                        context.stroke(
+                            path,
+                            with: .color(stroke.color),
+                            style: StrokeStyle(lineWidth: stroke.lineWidth, lineCap: .round, lineJoin: .round)
+                        )
+                    }
+
+                    // 2. Render current dragging stroke
+                    if let active = viewModel.currentStroke {
+                        var path = Path()
+                        if let first = active.points.first {
+                            path.move(to: first)
+                            for pt in active.points.dropFirst() {
+                                path.addLine(to: pt)
+                            }
+                            context.stroke(
+                                path,
+                                with: .color(active.color),
+                                style: StrokeStyle(lineWidth: active.lineWidth, lineCap: .round, lineJoin: .round)
+                            )
+                        }
+                    }
+
+                    // 3. Eraser cursor ring guide
+                    if viewModel.activeTool == .eraser, let mouseLoc = viewModel.currentMouseLocation {
+                        let r = viewModel.eraserRadius
+                        let rect = CGRect(x: mouseLoc.x - r, y: mouseLoc.y - r, width: r * 2, height: r * 2)
+                        let ringPath = Path(ellipseIn: rect)
+                        context.stroke(
+                            ringPath,
+                            with: .color(.secondary),
+                            style: StrokeStyle(lineWidth: 1.5, dash: [4, 3])
+                        )
+                    }
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                        .onChanged { value in
+                            if !isDragging {
+                                isDragging = true
+                                viewModel.startStroke(at: value.location)
+                            } else {
+                                viewModel.continueStroke(to: value.location)
+                            }
+                        }
+                        .onEnded { _ in
+                            isDragging = false
+                            viewModel.finishStroke()
+                        }
+                )
             }
         }
     }

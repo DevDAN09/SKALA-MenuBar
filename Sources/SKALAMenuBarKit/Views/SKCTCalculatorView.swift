@@ -154,6 +154,11 @@ public struct SKCTCalculatorView: View {
     private func setupKeyboardMonitor() {
         guard keyMonitor == nil else { return }
         keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+            // Do not intercept keystrokes if user is actively typing in an editable text view (e.g. SKCTNotepadView)
+            if let responder = NSApplication.shared.keyWindow?.firstResponder as? NSTextView, responder.isEditable {
+                return event
+            }
+
             guard let chars = event.characters else { return event }
             let keyCode = event.keyCode
 
