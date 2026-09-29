@@ -34,6 +34,14 @@ public final class SKCTTimerViewModel: ObservableObject {
         initialSeconds = totalSeconds
     }
 
+    public func setPreset(seconds: Int) {
+        guard !isRunning else { return }
+        isFinished = false
+        totalSeconds = max(0, min(5999, seconds))
+        initialSeconds = totalSeconds
+        isCountdown = totalSeconds > 0
+    }
+
     public func start() {
         guard !isRunning else { return }
         isFinished = false

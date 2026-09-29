@@ -388,7 +388,7 @@ func testSKCTWindowController() {
         assertionFailure("SKCT Window should not be nil")
         return
     }
-    assert(window.title == "SKCT 모의 환경 (화이트보드 & 계산기)", "Window title mismatch: \(window.title)")
+    assert(window.title == "SKCT 모의 환경 (메모장 · 화이트보드 & 계산기)", "Window title mismatch: \(window.title)")
     assert(window.frame.width >= 800, "Window width should be at least 800")
     assert(window.frame.height >= 550, "Window height should be at least 550")
     print("✅ testSKCTWindowController passed")
@@ -813,7 +813,51 @@ func testSKCTTimerViewModel() {
     timerVM.pause()
     assert(!timerVM.isRunning)
 
+    // Preset 45 seconds test
+    timerVM.reset()
+    timerVM.setPreset(seconds: 45)
+    assert(timerVM.totalSeconds == 45)
+    assert(timerVM.isCountdown)
+    assert(timerVM.timeString == "00:45")
+    timerVM.start()
+    assert(timerVM.isRunning)
+    timerVM.tick()
+    assert(timerVM.totalSeconds == 44)
+    assert(timerVM.timeString == "00:44")
+    timerVM.reset()
+
     print("✅ testSKCTTimerViewModel passed")
+}
+
+@MainActor
+func testSKCTNotepadAndMode() {
+    assert(SKCTMode.allCases == [.notepad, .whiteboard])
+    assert(SKCTMode.notepad.rawValue == "메모장")
+    assert(SKCTMode.whiteboard.rawValue == "화이트보드")
+    assert(!SKCTMode.notepad.icon.isEmpty)
+    assert(!SKCTMode.whiteboard.icon.isEmpty)
+
+    let notepadVM = SKCTNotepadViewModel()
+    assert(notepadVM.text == "")
+    assert(notepadVM.fontSize == 15.0)
+    assert(notepadVM.charCount == 0)
+
+    notepadVM.text = "125 * 3.4 = 425\n문제 풀이 메모"
+    assert(notepadVM.charCount == 24)
+    notepadVM.setFontSize(18.0)
+    assert(notepadVM.fontSize == 18.0)
+
+    let notepadView = SKCTNotepadView(viewModel: notepadVM)
+    _ = notepadView.body
+
+    notepadVM.clear()
+    assert(notepadVM.text == "")
+    assert(notepadVM.charCount == 0)
+
+    let practiceView = SKCTPracticeView()
+    _ = practiceView.body
+
+    print("✅ testSKCTNotepadAndMode passed")
 }
 
 func main() async {
@@ -821,6 +865,7 @@ func main() async {
         testSKCTCalculatorEngine()
         await testSKCTDrawingViewModel()
         await testSKCTTimerViewModel()
+        await testSKCTNotepadAndMode()
         testTargetBusStopMapping()
         try await testBusAPIServiceMultiStopConcurrent()
         await testBusViewModelDynamicStopName()
