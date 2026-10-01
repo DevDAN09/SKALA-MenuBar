@@ -5,7 +5,7 @@ public final class UpdateService: @unchecked Sendable {
     public static let shared = UpdateService()
 
     private let session: URLSession
-    public static let defaultCurrentVersion = "1.3.0"
+    public static let defaultCurrentVersion = "1.4.0"
     private let latestReleaseUrl = "https://api.github.com/repos/DevDAN09/SKALA-MenuBar/releases/latest"
     private let defaultPkgFallbackUrl = "https://github.com/DevDAN09/SKALA-MenuBar/releases/latest/download/SKALA-MenuBar.pkg"
 
