@@ -15,7 +15,15 @@ curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/main/scripts
 
 ---
 
-### 📦 수동 패키지 다운로드 (.pkg)
+### 💿 디스크 이미지 다운로드 (.dmg) - 드래그 앤 드롭 설치
+
+👉 **[최신 SKALA-MenuBar 디스크 이미지 다운로드 (.dmg)](https://github.com/DevDAN09/SKALA-MenuBar/releases/latest/download/SKALA-MenuBar.dmg)**
+
+- 다운로드 후 더블클릭하여 마운트한 뒤 `SKALA-MenuBar.app`을 `Applications` 폴더로 드래그하면 바로 설치됩니다.
+
+---
+
+### 📦 수동 패키지 다운로드 (.pkg) - 시스템 자동 설치
 
 👉 **[최신 SKALA-MenuBar 설치 패키지 다운로드 (.pkg)](https://github.com/DevDAN09/SKALA-MenuBar/releases/latest/download/SKALA-MenuBar.pkg)**
 
@@ -87,14 +95,21 @@ pkill -f SKALA-MenuBar
 
 ---
 
-## 📦 배포용 패키지(.pkg) 생성 및 설치
+## 📦 배포용 패키지(.dmg / .pkg) 생성 및 설치
 
-macOS 표준 설치 프로그램(`.pkg`)을 만들어 다른 Mac에 배포하거나 더블 클릭으로 간편하게 설치할 수 있습니다:
+### 1) DMG 디스크 이미지 생성 (권장: 드래그 앤 드롭 설치형)
+```bash
+./scripts/build_dmg.sh
+```
+- 생성 위치: `dist/SKALA-MenuBar-1.4.0.dmg` 및 `dist/SKALA-MenuBar.dmg`
+- 내장 구조: `SKALA-MenuBar.app` + `/Applications` 심볼릭 링크 + 커스텀 볼륨 아이콘
+- 더블클릭 시 열리는 창에서 앱을 응용 프로그램 폴더로 드래그하면 바로 설치됩니다.
 
+### 2) PKG 설치 패키지 생성 (시스템 인스톨러 방식)
 ```bash
 ./scripts/build_pkg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.3.0.pkg`
+- 생성 위치: `dist/SKALA-MenuBar-1.4.0.pkg` 및 `dist/SKALA-MenuBar.pkg`
 - 설치 위치: `/Applications/SKALA-MenuBar.app`
 - **보안 격리 자동 해제 내장**: 패키지 설치 시 `postinstall` 스크립트가 실행되어 앱의 Gatekeeper 격리 속성(`com.apple.quarantine`)을 자동으로 제거합니다.
 

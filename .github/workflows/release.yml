@@ -19,28 +19,33 @@ jobs:
         run: |
           swift run SKALAMenuBarTests
 
-      - name: Build macOS PKG
-        id: build_pkg
+      - name: Build macOS PKG & DMG
+        id: build_dist
         run: |
-          chmod +x ./scripts/build_pkg.sh
+          chmod +x ./scripts/build_pkg.sh ./scripts/build_dmg.sh
           chmod +x ./scripts/pkg_scripts/*
           ./scripts/build_pkg.sh
+          ./scripts/build_dmg.sh
           VERSION=$(grep '^VERSION=' ./scripts/build_pkg.sh | cut -d'"' -f2)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Upload PKG as GitHub Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: SKALA-MenuBar-pkg
-          path: dist/*.pkg
+          name: SKALA-MenuBar-dist
+          path: |
+            dist/*.pkg
+            dist/*.dmg
           retention-days: 14
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.build_pkg.outputs.version }}
-          name: Release v${{ steps.build_pkg.outputs.version }}
-          files: dist/*.pkg
+          tag_name: v${{ steps.build_dist.outputs.version }}
+          name: Release v${{ steps.build_dist.outputs.version }}
+          files: |
+            dist/*.pkg
+            dist/*.dmg
           generate_release_notes: true
           make_latest: true
         env:
