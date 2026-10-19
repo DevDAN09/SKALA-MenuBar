@@ -48,7 +48,6 @@ curl -fsSL https://raw.githubusercontent.com/DevDAN09/SKALA-MenuBar/main/scripts
   - **한국 표준시(KST) 실시간 시계**
   - **Tabling Spaces 공간 예약 바로가기**
   - **평일 출퇴근 알림**: 평일 08:50(입실 확인) 및 17:50(퇴실 확인) 로컬 시스템 알림 ON/OFF 스위치 토글
-  - **개발자 모드 이스터에그**: 생활 탭 버튼 5회 연속 클릭 시 출퇴근 모바일 웹뷰(사내망 Wi-Fi 감지, 17:50 퇴실 게이팅, 입실/퇴실 윈도우) 활성화
 - **🍱 판교 구내식당 듀얼 식단표 지원 (캠퍼스 & 이노밸리)**:
   - **🏢 캠퍼스 구내식당 (후니드)**:
     - 실시간 API 연동으로 0초 초고속 로딩
@@ -101,7 +100,7 @@ pkill -f SKALA-MenuBar
 ```bash
 ./scripts/build_dmg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.4.0.dmg` 및 `dist/SKALA-MenuBar.dmg`
+- 생성 위치: `dist/SKALA-MenuBar-1.4.1.dmg` 및 `dist/SKALA-MenuBar.dmg`
 - 내장 구조: `SKALA-MenuBar.app` + `/Applications` 심볼릭 링크 + 커스텀 볼륨 아이콘
 - 더블클릭 시 열리는 창에서 앱을 응용 프로그램 폴더로 드래그하면 바로 설치됩니다.
 
@@ -109,7 +108,7 @@ pkill -f SKALA-MenuBar
 ```bash
 ./scripts/build_pkg.sh
 ```
-- 생성 위치: `dist/SKALA-MenuBar-1.4.0.pkg` 및 `dist/SKALA-MenuBar.pkg`
+- 생성 위치: `dist/SKALA-MenuBar-1.4.1.pkg` 및 `dist/SKALA-MenuBar.pkg`
 - 설치 위치: `/Applications/SKALA-MenuBar.app`
 - **보안 격리 자동 해제 내장**: 패키지 설치 시 `postinstall` 스크립트가 실행되어 앱의 Gatekeeper 격리 속성(`com.apple.quarantine`)을 자동으로 제거합니다.
 

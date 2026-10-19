@@ -7,7 +7,7 @@ public final class CafeteriaAPIService: @unchecked Sendable {
     private let channelId = "_LCxlxlxb"
     private let cacheFileName = "cafeteria_weekly_menu_cache.json"
     private let campusCacheFileName = "campus_weekly_menu_cache.json"
-    private let campusApiUrl = "https://skala-lunch.ewkimhyunsu11.workers.dev/api/menus/current"
+    private let campusApiUrl = "https://lunch.mockaptilab.com/api/menus/current"
 
     public init() {}
 

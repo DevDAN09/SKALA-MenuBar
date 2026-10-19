@@ -83,7 +83,7 @@ public final class CafeteriaViewModel: ObservableObject {
     }
 
     public func openCampusWebsite() {
-        if let url = URL(string: "https://skala-lunch.ewkimhyunsu11.workers.dev/") {
+        if let url = URL(string: "https://lunch.mockaptilab.com/") {
             NSWorkspace.shared.open(url)
         }
     }
